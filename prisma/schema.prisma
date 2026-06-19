@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           BigInt   @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  passwordHash String   @map("password_hash")
+  role         String   @default("customer")
+  company      String?
+  note         String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  sessions       Session[]
+  passwordResets PasswordReset[]
+  inboxThreads   InboxThread[] @relation("InboxOwner")
+  inboxMessages  InboxMessage[]
+  inboxUploads   InboxAttachment[] @relation("InboxUploader")
+  bookings       CalendarBooking[]
+
+  @@map("users")
+}
+
+model Setting {
+  key   String @id
+  value String
+
+  @@map("settings")
+}
+
+model PasswordReset {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt   @map("user_id")
+  tokenHash String   @map("token_hash")
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_password_resets_user_id")
+  @@index([tokenHash], map: "idx_password_resets_token_hash")
+  @@map("password_resets")
+}
+
+model Outbox {
+  id        BigInt   @id @default(autoincrement())
+  kind      String
+  toEmail   String   @map("to_email")
+  subject   String
+  body      String
+  status    String
+  error     String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  sentAt    DateTime? @map("sent_at") @db.Timestamptz(6)
+
+  @@index([createdAt], map: "idx_outbox_created_at")
+  @@map("outbox")
+}
+
+model Session {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt   @map("user_id")
+  tokenHash String   @map("token_hash")
+  role      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash], map: "idx_sessions_token_hash")
+  @@index([userId], map: "idx_sessions_user_id")
+  @@map("sessions")
+}
+
+model InboxThread {
+  id          BigInt   @id @default(autoincrement())
+  ownerUserId BigInt   @map("owner_user_id")
+  subject     String
+  status      String   @default("open")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  owner       User            @relation("InboxOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  messages    InboxMessage[]
+  attachments InboxAttachment[]
+
+  @@index([ownerUserId], map: "idx_inbox_threads_owner")
+  @@index([updatedAt], map: "idx_inbox_threads_updated")
+  @@map("inbox_threads")
+}
+
+model InboxMessage {
+  id           BigInt   @id @default(autoincrement())
+  threadId     BigInt   @map("thread_id")
+  senderUserId BigInt   @map("sender_user_id")
+  senderRole   String   @map("sender_role")
+  body         String
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  thread InboxThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender User        @relation(fields: [senderUserId], references: [id], onDelete: Cascade)
+  attachments InboxAttachment[]
+
+  @@index([threadId], map: "idx_inbox_messages_thread")
+  @@map("inbox_messages")
+}
+
+model InboxAttachment {
+  id            BigInt   @id @default(autoincrement())
+  threadId      BigInt   @map("thread_id")
+  messageId     BigInt?  @map("message_id")
+  uploaderUserId BigInt  @map("uploader_user_id")
+  originalName  String   @map("original_name")
+  mimeType      String   @map("mime_type")
+  sizeBytes     BigInt   @map("size_bytes")
+  storagePath   String   @map("storage_path")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  thread   InboxThread  @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  message  InboxMessage? @relation(fields: [messageId], references: [id], onDelete: SetNull)
+  uploader User         @relation("InboxUploader", fields: [uploaderUserId], references: [id], onDelete: Cascade)
+
+  @@index([threadId], map: "idx_inbox_attachments_thread")
+  @@map("inbox_attachments")
+}
+
+model BookingCategory {
+  id                BigInt   @id @default(autoincrement())
+  name              String   @unique
+  depositAmountMinor BigInt  @default(50000) @map("deposit_amount_minor")
+  currency          String   @default("try")
+  active            Boolean  @default(true)
+  sortOrder         Int      @default(0) @map("sort_order")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  bookings CalendarBooking[]
+
+  @@index([active, sortOrder, id], map: "idx_booking_categories_active")
+  @@map("booking_categories")
+}
+
+model CalendarBooking {
+  id          BigInt   @id @default(autoincrement())
+  userId      BigInt?  @map("user_id")
+  categoryId  BigInt?  @map("category_id")
+  name        String
+  email       String
+  phone       String?
+  bookingDate DateTime @map("booking_date") @db.Date
+  slotStart   String   @map("slot_start")
+  slotEnd     String   @map("slot_end")
+  note        String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user      User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  category  BookingCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  payments  PaymentRequest[]
+
+  @@index([bookingDate, slotStart], map: "idx_calendar_bookings_date_slot")
+  @@index([status], map: "idx_calendar_bookings_status")
+  @@map("calendar_bookings")
+}
+
+model PaymentRequest {
+  id          BigInt   @id @default(autoincrement())
+  bookingId   BigInt   @map("booking_id")
+  provider    String
+  kind        String
+  amountMinor BigInt   @map("amount_minor")
+  currency    String
+  status      String   @default("created")
+  providerRef String?  @map("provider_ref")
+  payUrl      String?  @map("pay_url")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  paidAt      DateTime? @map("paid_at") @db.Timestamptz(6)
+
+  booking CalendarBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId], map: "idx_payment_requests_booking_id")
+  @@index([providerRef], map: "idx_payment_requests_provider_ref")
+  @@map("payment_requests")
+}
+

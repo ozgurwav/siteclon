@@ -1,0 +1,17 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:splat*",
+      "destination": "/api?splat=:splat*"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/"
+    }
+  ],
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "{api,server,prisma}/**"
+    }
+  }
+}
