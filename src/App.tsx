@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Edit3, MessageCircle, Plus, ShoppingBag, Trash2, Upload, X } from 'lucide-react';
+import { Edit3, MessageCircle, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
 import { onValue, ref as dbRef, remove, set } from 'firebase/database';
-import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage';
-import { firebaseStorage, realtimeDb } from './lib/firebase';
+import { realtimeDb } from './lib/firebase';
 
 type ProductKind = 'hali' | 'perde';
 type Page = 'home' | ProductKind | 'iletisim';
@@ -167,14 +166,6 @@ export default function App() {
     setAuthOpen(false);
   }
 
-  async function handleImage(file: File | null) {
-    if (!file) return;
-    const imageRef = storageRef(firebaseStorage, `products/${Date.now()}-${file.name}`);
-    await uploadBytes(imageRef, file);
-    const url = await getDownloadURL(imageRef);
-    setDraft((current) => ({ ...current, image: url }));
-  }
-
   function addProduct(kind: ProductKind) {
     if (!draft.name.trim() || !draft.price.trim()) return;
     const id = `${kind}-${Date.now()}`;
@@ -232,7 +223,6 @@ export default function App() {
           isAdmin={isAdmin}
           draft={draft}
           setDraft={setDraft}
-          onImage={handleImage}
           onAdd={addProduct}
           onRemove={removeProduct}
           contact={contact}
@@ -439,7 +429,6 @@ function ProductPage({
   isAdmin,
   draft,
   setDraft,
-  onImage,
   onAdd,
   onRemove,
   contact,
@@ -449,7 +438,6 @@ function ProductPage({
   isAdmin: boolean;
   draft: { name: string; price: string; image: string };
   setDraft: React.Dispatch<React.SetStateAction<{ name: string; price: string; image: string }>>;
-  onImage: (file: File | null) => Promise<void>;
   onAdd: (kind: ProductKind) => void;
   onRemove: (id: string) => void;
   contact: ContactInfo;
@@ -473,7 +461,7 @@ function ProductPage({
             <Edit3 className="h-4 w-4" />
             Admin ürün düzenleme
           </div>
-          <div className="grid gap-3 md:grid-cols-[1fr_160px_1fr_180px_auto]">
+          <div className="grid gap-3 md:grid-cols-[1fr_160px_1fr_auto]">
             <input
               value={draft.name}
               onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
@@ -493,11 +481,6 @@ function ProductPage({
               className="h-11 border border-white/12 bg-black px-3 text-sm text-white outline-none placeholder:text-white/34 focus:border-white/35"
               placeholder="Görsel linki"
             />
-            <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 border border-white/12 bg-black px-3 text-sm text-white/78 transition hover:text-white">
-              <Upload className="h-4 w-4" />
-              Dosya seç
-              <input className="hidden" type="file" accept="image/*" onChange={(event) => void onImage(event.target.files?.[0] || null)} />
-            </label>
             <button
               type="button"
               className="inline-flex h-11 items-center justify-center gap-2 bg-white px-5 text-sm font-medium text-black transition hover:bg-white/90"
