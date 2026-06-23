@@ -1,6 +1,6 @@
-import { Button } from './Button';
 import { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { Menu, Search, User, X } from 'lucide-react';
 import { EditableText } from '../admin/EditableText';
 import { useEditableAsset } from '../admin/assets';
 import { useAdmin } from '../admin/AdminContext';
@@ -27,6 +27,34 @@ export function BottomNav() {
   const { value: waQuick1 } = useEditableAsset('whatsapp.quick.1', 'Fiyat bilgisi alabilir miyim?');
   const { value: waQuick2 } = useEditableAsset('whatsapp.quick.2', 'Takvim uygunluğu soracaktım.');
   const { value: waQuick3 } = useEditableAsset('whatsapp.quick.3', 'Bir projeyi konuşalım mı?');
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const navItems = [
+    { href: '/', labelKey: 'topNav.home', defaultLabel: 'ANA SAYFA' },
+    { href: '/portfolio', labelKey: 'topNav.collections', defaultLabel: 'KOLEKSIYONLAR' },
+    { href: '/packages', labelKey: 'topNav.rugs', defaultLabel: 'HALILAR' },
+    { href: '/takvim', labelKey: 'topNav.curtains', defaultLabel: 'PERDELER' },
+  ];
+
+  function goTo(href: string) {
+    setMobileMenuOpen(false);
+    setSearchOpen(false);
+    if (href === '/') {
+      window.history.pushState({}, '', '/');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      return;
+    }
+    window.location.href = href;
+  }
+
+  function openSearch() {
+    setMobileMenuOpen(false);
+    setSearchQuery('');
+    setSearchOpen(true);
+  }
 
   const waNow = useMemo(() => {
     try {
@@ -270,45 +298,165 @@ export function BottomNav() {
     );
   }, [canPortal, defaultMessage, isAdmin, waHref, waName, waNow, waOpen, waQuick1, waQuick2, waQuick3, waDraft]);
 
-  return (
-    <div className="fixed left-1/2 z-50 w-[min(100%,calc(100vw-1.25rem))] max-w-md -translate-x-1/2 bottom-[max(1.25rem,env(safe-area-inset-bottom,0px))]">
-      <div className="bg-white rounded-full px-3 py-2 sm:px-4 flex items-center justify-center gap-3 sm:gap-6 shadow-[0_4px_30px_rgba(0,0,0,0.15),0_0_0_0.5px_rgba(0,0,0,0.05),inset_0_2px_8px_0_rgba(255,255,255,0.5)]">
-        <Button
-          variant="primary"
-          className="py-2 px-6 bg-white text-[#051A24]"
-          type="button"
-          onClick={() => {
-            setWaName('');
-            setWaDraft('');
-            setWaOpen(true);
-          }}
+  const searchModal = useMemo(() => {
+    if (!searchOpen || !canPortal) return null;
+    const q = searchQuery.trim().toLocaleLowerCase('tr-TR');
+    const matches = navItems.filter((item) => item.defaultLabel.toLocaleLowerCase('tr-TR').includes(q));
+    const results = matches.length ? matches : navItems;
+    return (
+      <div className="fixed inset-0 z-[70] flex items-start justify-center px-4 pt-24 sm:px-6">
+        <div className="absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={() => setSearchOpen(false)} />
+        <div
+          className="relative w-full max-w-xl rounded-[8px] border border-white/14 bg-black/88 p-3 text-white shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
         >
-          <span className="flex flex-col items-start leading-tight">
-            <span className="font-medium">
-              <EditableText assetKey="bottomNav.whatsappLabel" defaultValue="WhatsApp" as="span" />
-            </span>
-            {isAdmin ? (
-              <span className="text-[11px] opacity-70 -mt-0.5">
-                <EditableText assetKey="whatsapp.phone" defaultValue="905XXXXXXXXX" as="span" />
-              </span>
-            ) : null}
-          </span>
-        </Button>
-        <Button
-          variant="primary"
-          className="py-2 px-6"
-          onClick={() => {
-            if (role === 'guest') {
-              window.dispatchEvent(new CustomEvent('aiag:open-auth', { detail: { tab: 'login' } }));
-              return;
-            }
-            setDraft('');
-            setOpen(true);
-          }}
-        >
-          <EditableText assetKey="bottomNav.cta" defaultValue="Start a chat" as="span" />
-        </Button>
+          <div className="flex items-center gap-2 rounded-full border border-white/16 px-4">
+            <Search className="h-4 w-4 text-white/70" aria-hidden="true" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') goTo(results[0]?.href || '/');
+                if (e.key === 'Escape') setSearchOpen(false);
+              }}
+              className="h-11 min-w-0 flex-1 bg-transparent text-[15px] text-white outline-none placeholder:text-white/45"
+              placeholder="Ara"
+              autoFocus
+            />
+            <button
+              type="button"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
+              onClick={() => setSearchOpen(false)}
+              aria-label="Kapat"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="mt-3 grid gap-1">
+            {results.map((item) => (
+              <button
+                key={item.labelKey}
+                type="button"
+                className="flex h-10 items-center rounded-md px-3 text-left text-[13px] font-semibold uppercase tracking-[0.12em] text-white/72 transition hover:bg-white/10 hover:text-white"
+                onClick={() => goTo(item.href)}
+              >
+                {item.defaultLabel}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
+    );
+  }, [canPortal, navItems, searchOpen, searchQuery]);
+
+  return (
+    <div className="fixed left-0 right-0 top-0 z-50 px-4 pt-[max(1.25rem,env(safe-area-inset-top,0px))] sm:px-6 lg:px-9">
+      <header className="mx-auto flex h-11 w-full max-w-[1360px] items-center justify-between gap-5 text-white">
+        <button
+          type="button"
+          className="shrink-0 text-left text-[20px] font-semibold uppercase leading-none tracking-[0.12em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)] sm:text-[22px]"
+          onClick={() => goTo('/')}
+          aria-label="Ana sayfa"
+        >
+          <EditableText assetKey="topNav.brand" defaultValue="ELIT DOKUMA" as="span" />
+        </button>
+
+        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-8 lg:flex">
+          {navItems.map((item, index) => (
+            <button
+              key={item.labelKey}
+              type="button"
+              className={`text-[13px] font-semibold uppercase tracking-[0.12em] transition hover:text-white ${
+                index === 0 ? 'text-white' : 'text-white/62'
+              }`}
+              onClick={() => goTo(item.href)}
+            >
+              <EditableText assetKey={item.labelKey} defaultValue={item.defaultLabel} as="span" />
+            </button>
+          ))}
+        </nav>
+
+        <div className="hidden shrink-0 items-center gap-3 md:flex">
+          <button
+            type="button"
+            className="inline-flex h-9 items-center gap-2 rounded-full border border-white/18 bg-black/18 px-5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md transition hover:border-white/32 hover:bg-white/10"
+            onClick={openSearch}
+            aria-label="Arama"
+          >
+            <Search className="h-4 w-4" aria-hidden="true" />
+            <EditableText assetKey="topNav.search" defaultValue="Arama" as="span" />
+          </button>
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/18 bg-black/18 text-white backdrop-blur-md transition hover:border-white/32 hover:bg-white/10"
+            onClick={() => {
+              if (role === 'guest') {
+                window.dispatchEvent(new CustomEvent('aiag:open-auth', { detail: { tab: 'login' } }));
+                return;
+              }
+              setDraft('');
+              setOpen(true);
+            }}
+            aria-label="Hesap"
+          >
+            <User className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+
+        <button
+          type="button"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/18 bg-black/18 text-white backdrop-blur-md transition hover:border-white/32 hover:bg-white/10 lg:hidden"
+          onClick={() => setMobileMenuOpen((v) => !v)}
+          aria-label={mobileMenuOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+          aria-expanded={mobileMenuOpen}
+        >
+          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </header>
+
+      {mobileMenuOpen ? (
+        <div className="mx-auto mt-3 w-full max-w-[1360px] rounded-[8px] border border-white/14 bg-black/82 p-2 text-white shadow-2xl backdrop-blur-xl lg:hidden">
+          {navItems.map((item, index) => (
+            <button
+              key={item.labelKey}
+              type="button"
+              className={`flex h-11 w-full items-center rounded-md px-3 text-left text-[13px] font-semibold uppercase tracking-[0.12em] ${
+                index === 0 ? 'text-white' : 'text-white/66'
+              }`}
+              onClick={() => goTo(item.href)}
+            >
+              <EditableText assetKey={item.labelKey} defaultValue={item.defaultLabel} as="span" />
+            </button>
+          ))}
+          <div className="mt-2 grid grid-cols-[1fr_44px] gap-2 border-t border-white/10 pt-2">
+            <button
+              type="button"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-white/14 text-[13px] font-semibold text-white"
+              onClick={openSearch}
+            >
+              <Search className="h-4 w-4" aria-hidden="true" />
+              <EditableText assetKey="topNav.search" defaultValue="Arama" as="span" />
+            </button>
+            <button
+              type="button"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-white/14 text-white"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (role === 'guest') {
+                  window.dispatchEvent(new CustomEvent('aiag:open-auth', { detail: { tab: 'login' } }));
+                  return;
+                }
+                setDraft('');
+                setOpen(true);
+              }}
+              aria-label="Hesap"
+            >
+              <User className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      ) : null}
+      {searchOpen && canPortal && searchModal ? createPortal(searchModal, document.body) : null}
       {open && canPortal && modal ? createPortal(modal, document.body) : null}
       {waOpen && canPortal && waModal ? createPortal(waModal, document.body) : null}
     </div>

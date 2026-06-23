@@ -480,6 +480,128 @@ function iyzipayCheckoutFormRetrieve(client: any, payload: Record<string, unknow
   });
 }
 
+function toIyzicoPrice(value: unknown): number {
+  const normalized = String(value || '')
+    .replace(/[^\d,.-]/g, '')
+    .replace(/\./g, '')
+    .replace(',', '.');
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function priceString(value: number): string {
+  return value.toFixed(2);
+}
+
+async function startIyzipayCheckoutForCart(req: express.Request): Promise<IyzipayCheckoutStart> {
+  if (!iyzipayEnvConfigured()) {
+    return { ok: false, reason: 'env', iyzico: { errorMessage: 'IYZIPAY_API_KEY / IYZIPAY_SECRET_KEY / IYZIPAY_URI eksik' } };
+  }
+
+  const body = (req as any).body || {};
+  const itemsRaw = Array.isArray(body.items) ? body.items : [];
+  const items = itemsRaw
+    .map((item: any, idx: number) => {
+      const quantity = Math.max(1, Math.min(99, Number(item?.quantity || 1) || 1));
+      const unitPrice = toIyzicoPrice(item?.price);
+      const total = unitPrice * quantity;
+      return {
+        id: String(item?.id || `item-${idx + 1}`).slice(0, 64),
+        name: String(item?.name || `Urun ${idx + 1}`).slice(0, 128),
+        quantity,
+        unitPrice,
+        total,
+      };
+    })
+    .filter((item: any) => item.unitPrice > 0 && item.total > 0);
+
+  const total = items.reduce((sum: number, item: any) => sum + item.total, 0);
+  if (!items.length || total <= 0) return { ok: false, reason: 'amount', iyzico: { errorMessage: 'Sepet tutarı 0' } };
+
+  const buyerInput = body.buyer || {};
+  const name = String(buyerInput.name || 'Ezgi').trim();
+  const surname = String(buyerInput.surname || 'Musteri').trim();
+  const email = String(buyerInput.email || 'sandbox@example.com').trim().toLowerCase();
+  const phone = String(buyerInput.phone || '+905000000000').trim();
+  const address = String(buyerInput.address || process.env.IYZIPAY_DEFAULT_ADDRESS || 'Turkiye').trim();
+
+  const { Iyzipay, client } = newIyzipayClient();
+  const conversationId = `cart-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+  const callbackUrl = `${publicApiBase(req)}/api/payments/iyzipay/cart/return`;
+  const identityNumber = String(process.env.IYZIPAY_DEFAULT_IDENTITY || '74300864791').trim();
+
+  const buyer = {
+    id: `buyer-${crypto.randomBytes(4).toString('hex')}`,
+    name: name || 'Ezgi',
+    surname: surname || 'Musteri',
+    gsmNumber: formatGsmTr(phone),
+    email: isValidEmail(email) ? email : 'sandbox@example.com',
+    identityNumber,
+    registrationAddress: address,
+    city: 'Istanbul',
+    country: 'Turkey',
+    zipCode: '34000',
+    ip: clientIp(req),
+  };
+
+  const addr = {
+    contactName: `${buyer.name} ${buyer.surname}`.trim(),
+    city: 'Istanbul',
+    country: 'Turkey',
+    address,
+    zipCode: '34000',
+  };
+
+  const request = {
+    locale: Iyzipay.LOCALE.TR,
+    conversationId,
+    price: priceString(total),
+    paidPrice: priceString(total),
+    currency: Iyzipay.CURRENCY.TRY,
+    basketId: conversationId,
+    paymentGroup: Iyzipay.PAYMENT_GROUP.PRODUCT,
+    callbackUrl,
+    enabledInstallments: [1, 2, 3, 6, 9],
+    buyer,
+    shippingAddress: addr,
+    billingAddress: addr,
+    basketItems: items.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      category1: 'Ev Tekstili',
+      itemType: Iyzipay.BASKET_ITEM_TYPE.PHYSICAL,
+      price: priceString(item.total),
+    })),
+  };
+
+  let result: any;
+  try {
+    result = await iyzipayCheckoutFormInitialize(client, request);
+  } catch (e) {
+    console.error('[aiag] iyzipay cart checkoutFormInitialize', e);
+    return { ok: false, reason: 'iyzipay_network', iyzico: { errorMessage: String((e as any)?.message || e || 'Ağ hatası') } };
+  }
+
+  if (!result || String(result.status).toLowerCase() !== 'success') {
+    return {
+      ok: false,
+      reason: 'iyzipay_declined',
+      iyzico: {
+        errorMessage: result?.errorMessage || 'iyzico başarısız yanıt',
+        errorCode: result?.errorCode,
+        status: result?.status,
+      },
+    };
+  }
+
+  const token = String(result.token || '').trim();
+  const checkoutHtml = String(result.checkoutFormContent || '').trim();
+  if (!token || !checkoutHtml) {
+    return { ok: false, reason: 'iyzipay_declined', iyzico: { errorMessage: 'iyzico checkout form eksik döndü', status: result?.status } };
+  }
+  return { ok: true, checkoutFormContent: checkoutHtml, token };
+}
+
 type IyzipayCheckoutStart =
   | { ok: true; checkoutFormContent: string; token: string }
   | {
@@ -813,6 +935,45 @@ app.all('/api/payments/iyzipay/return', async (req, res) => {
     return res.status(405).type('text/plain').send('Method Not Allowed');
   }
   await handleIyzipayReturn(req, res);
+});
+
+app.all('/api/payments/iyzipay/cart/return', async (req, res) => {
+  const fe = publicFrontendBase();
+  const token = String((req as any).body?.token || (req as any).query?.token || '').trim();
+  if (!token || !iyzipayEnvConfigured()) return res.redirect(303, `${fe}/#odeme-iptal`);
+  try {
+    const { client } = newIyzipayClient();
+    const retrieved = await iyzipayCheckoutFormRetrieve(client, {
+      locale: 'tr',
+      conversationId: `cart-return-${Date.now()}`,
+      token,
+    });
+    const status = String(retrieved?.paymentStatus || retrieved?.status || '').toLowerCase();
+    const ok = status === 'success' || status === 'paid';
+    return res.redirect(303, `${fe}/${ok ? '#odeme-basarili' : '#odeme-iptal'}`);
+  } catch (e) {
+    console.error('[aiag] iyzipay cart retrieve', e);
+    return res.redirect(303, `${fe}/#odeme-iptal`);
+  }
+});
+
+app.post('/api/payments/iyzipay/cart', async (req, res) => {
+  try {
+    const started = await startIyzipayCheckoutForCart(req);
+    if (started.ok === false) {
+      return res.status(started.reason === 'env' ? 503 : 400).json({
+        ok: false,
+        error: started.reason,
+        message: started.iyzico?.errorMessage || started.reason,
+        code: started.iyzico?.errorCode,
+        callbackUrl: `${publicApiBase(req)}/api/payments/iyzipay/cart/return`,
+      });
+    }
+    return res.json({ ok: true, iyzicoCheckout: { checkoutFormContent: started.checkoutFormContent } });
+  } catch (e: any) {
+    console.error('[aiag] /api/payments/iyzipay/cart', e);
+    return res.status(500).json({ ok: false, error: 'server_error', message: String(e?.message || 'Sunucu hatası') });
+  }
 });
 
 app.post('/api/payments/iyzipay/initialize', async (req, res) => {

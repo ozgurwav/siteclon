@@ -257,7 +257,17 @@ export function AdminWidget() {
   if (!adminEnabled) return null;
 
   const pillClass =
-    'rounded-full px-4 py-2 text-sm shadow-[0_4px_30px_rgba(0,0,0,0.15),0_0_0_0.5px_rgba(0,0,0,0.05),inset_0_2px_8px_0_rgba(255,255,255,0.5)] hover:opacity-90 active:scale-95 transition bg-white text-[#051A24]';
+    'rounded-full border border-white/18 bg-black/10 px-4 py-2 text-sm leading-none text-white/86 backdrop-blur-md hover:border-white/34 hover:text-white active:scale-95 transition';
+  const navActionClass =
+    'rounded-full border border-white/18 bg-black/10 px-4 py-2 text-sm leading-none text-white/86 backdrop-blur-md hover:border-white/34 hover:text-white active:scale-95 transition';
+
+  const primaryNavItems = [
+    { href: '#ana-sayfa', label: 'ANA SAYFA' },
+    { href: '#koleksiyonlar', label: 'KOLEKSIYONLAR' },
+    { href: '#halilar', label: 'HALILAR' },
+    { href: '#perdeler', label: 'PERDELER' },
+    { href: '#iletisim', label: 'ILETISIM' },
+  ];
 
   const { value: calendarUrl } = useEditableAsset('admin.links.calendar', '/calendar');
   const { value: portfolioUrl } = useEditableAsset('admin.links.portfolio', '#');
@@ -1482,37 +1492,40 @@ export function AdminWidget() {
 
   return (
     <>
-      <div className="fixed top-4 left-4 right-4 z-[60]" ref={menuRef}>
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <a href="/" className={`${pillClass} relative overflow-hidden`} aria-label="Anasayfa" title="Anasayfa">
-            {brandLogoUrl && brandLogoMode === 'logo' ? (
-              <img
-                src={brandLogoUrl}
-                alt="Logo"
-                className="h-8 md:h-9 max-w-[220px] w-auto object-contain opacity-90 hover:opacity-100 transition"
-                style={{ filter: 'contrast(1.05) saturate(0.98)' }}
-              />
-            ) : (
-              <span className="relative flex min-h-7 flex-col justify-center leading-tight">
-                {brandLogoUrl && brandLogoMode === 'behindText' ? (
-                  <img
-                    src={brandLogoUrl}
-                    alt=""
-                    aria-hidden="true"
-                    className="pointer-events-none absolute left-1/2 top-1/2 h-10 w-24 -translate-x-1/2 -translate-y-1/2 object-contain opacity-15"
-                  />
-                ) : null}
-                <span className="text-[12px] md:text-[13px] font-mono uppercase tracking-[0.22em] text-[#051A24]">
-                  {brandTitle}
-                </span>
-                <span className="mt-0.5 text-[10px] font-mono uppercase tracking-[0.18em] text-[#051A24]/70">
-                  {brandTaglineText}
-                </span>
+      <div className="fixed left-0 right-0 top-0 z-[60] px-4 pt-[max(0.9rem,env(safe-area-inset-top,0px))] sm:px-6 lg:px-9" ref={menuRef}>
+        <div className="mx-auto grid w-full max-w-[1360px] grid-cols-[auto_1fr_auto] items-center gap-4 text-white max-lg:grid-cols-[auto_auto] max-lg:justify-between">
+          <a
+            href="/"
+            className="relative min-h-11 max-w-[360px] overflow-hidden py-1 text-white max-sm:max-w-[min(72vw,330px)]"
+            aria-label="Anasayfa"
+            title="Anasayfa"
+          >
+            <span className="relative flex min-h-7 flex-col justify-center leading-tight">
+              <span className="text-[21px] font-semibold uppercase tracking-[0.13em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)] md:text-[23px]">
+                EZGI HALI PERDE
               </span>
-            )}
+              <span className="mt-1 text-[9px] font-mono uppercase tracking-[0.26em] text-white/58">
+                PREMIUM HALI • PERDE • DOKUMA
+              </span>
+            </span>
           </a>
 
-          <div className="flex items-center justify-end gap-2 flex-wrap">
+          <nav className="hidden min-w-0 items-center justify-center gap-8 lg:flex">
+            {primaryNavItems.map((item, idx) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={`text-[13px] font-semibold uppercase tracking-[0.12em] transition hover:text-white ${
+                  idx === 0 ? 'text-white' : 'text-white/58'
+                }`}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="flex min-w-0 items-center justify-end gap-2 max-md:max-w-[calc(100vw-2rem)] max-md:overflow-x-auto max-md:pb-1">
+          <div className="hidden">
           <a className={pillClass} {...toolbarLinkProps(calendarHrefResolved)} aria-label="Takvim" title="Takvim">
             Takvim
           </a>
@@ -1615,7 +1628,7 @@ export function AdminWidget() {
               <div key={b.id} className="relative">
                 <button
                   type="button"
-                  className={pillClass}
+                  className={navActionClass}
                   onClick={() => setOpenToolbarMenuId((cur) => (cur === b.id ? null : b.id))}
                   aria-expanded={isOpen}
                   aria-label={b.label}
@@ -1685,8 +1698,10 @@ export function AdminWidget() {
             );
           })}
 
+          </div>
+
           {role === 'guest' ? (
-            <button type="button" onClick={() => setOpen(true)} className={pillClass}>
+            <button type="button" onClick={() => setOpen(true)} className={navActionClass}>
               {title}
             </button>
           ) : role === 'customer' ? (
@@ -1694,7 +1709,7 @@ export function AdminWidget() {
               <div className="relative">
                 <button
                   type="button"
-                  className={pillClass}
+                  className={navActionClass}
                   onClick={() => setCustomerMenuOpen((v) => !v)}
                   aria-expanded={customerMenuOpen}
                   aria-label="Müşteri menü"
@@ -1738,7 +1753,7 @@ export function AdminWidget() {
 
               <button
                 type="button"
-                className={pillClass}
+                className={navActionClass}
                 onClick={logout}
                 aria-label="Çıkış"
                 title="Çıkış"
@@ -1751,7 +1766,7 @@ export function AdminWidget() {
               <div className="relative">
                 <button
                   type="button"
-                  className={pillClass}
+                  className={navActionClass}
                   onClick={() => setMenuOpen((v) => !v)}
                   aria-expanded={menuOpen}
                   aria-label="Yönetici menü"
@@ -1767,7 +1782,7 @@ export function AdminWidget() {
                   <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white shadow-[0_16px_60px_rgba(0,0,0,0.18),0_0_0_1px_rgba(0,0,0,0.06)] overflow-hidden">
                     <button
                       type="button"
-                      className="w-full px-4 py-3 text-sm text-left hover:bg-black/[0.02] transition"
+                      className="hidden"
                       onClick={() => {
                         setToolbarError(null);
                         setToolbarOpen(true);
@@ -1840,7 +1855,7 @@ export function AdminWidget() {
                 ) : null}
               </div>
 
-              <button type="button" className={pillClass} onClick={logout} aria-label="Çıkış" title="Çıkış">
+              <button type="button" className={navActionClass} onClick={logout} aria-label="Çıkış" title="Çıkış">
                 <LogOut className="h-4 w-4" />
               </button>
             </>
@@ -1856,7 +1871,7 @@ export function AdminWidget() {
             <div className="p-5 border-b border-black/10 flex items-start justify-between gap-4">
               <div>
                 <div className="text-lg font-semibold text-[#051A24]">Toolbar ayarları</div>
-                <div className="text-xs text-[#051A24]/70 mt-1">
+                <div className="text-xs text-white/58 mt-1">
                   Butonları buradan ekleyip silebilirsin. Değişiklikler sadece admin modda görünür.
                 </div>
               </div>
@@ -1949,7 +1964,7 @@ export function AdminWidget() {
                             }),
                           );
                         }}
-                        className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
+                        className="w-full rounded-[8px] border border-white/12 bg-white/[0.06] px-3 py-2 text-sm text-white outline-none placeholder:text-white/34 focus:border-white/34"
                         placeholder="Örn: Takvim"
                       />
                     </div>
@@ -2538,7 +2553,7 @@ export function AdminWidget() {
             <div className="p-5 overflow-y-auto space-y-4">
               <div className="hidden">
                 <div className="text-xs font-semibold text-[#051A24]">Site medya merkezi</div>
-                <div className="text-xs text-[#051A24]/70 mt-1">
+                <div className="hidden">
                   Logo, hero, marquee içeriği, partner efekti ve ana sayfa büyük projeler dahil içerikler bu panelde.
                   Ana sayfadaki blok sırası bir alttaki &quot;Ana sayfa blok sırası&quot;ndan düzenlenir ve kaydedilir.
                 </div>
@@ -4118,16 +4133,17 @@ export function AdminWidget() {
 
       {open ? (
         <div className="fixed inset-0 z-[70] flex items-center justify-center px-6">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-          <div className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden">
-            <div className="p-5 border-b border-black/10 flex items-start justify-between gap-4">
+          <div className="absolute inset-0 bg-black/78 backdrop-blur-md" onClick={() => setOpen(false)} />
+          <div className="relative w-full max-w-md overflow-hidden rounded-[8px] border border-white/12 bg-[#050505] text-white shadow-[0_28px_90px_rgba(0,0,0,0.55)]">
+            <div className="p-5 border-b border-white/10 flex items-start justify-between gap-4">
               <div>
-                <div className="text-lg font-semibold text-[#051A24]">Hesap</div>
+                <div className="text-lg font-semibold tracking-[0.08em] uppercase text-white">Ezgi Halı Perde</div>
+                <div className="text-xs text-white/58 mt-1">Premium koleksiyon giris sablonu.</div>
                 <div className="text-xs text-[#051A24]/70 mt-1">Giriş yapınca rolüne göre üst menü aktif olur.</div>
               </div>
               <button
                 type="button"
-                className="text-[#051A24]/60 hover:text-[#051A24] px-2"
+                className="text-white/55 hover:text-white px-2"
                 onClick={() => setOpen(false)}
                 aria-label="Kapat"
               >
@@ -4136,13 +4152,13 @@ export function AdminWidget() {
             </div>
 
             <div className="p-5">
-              <div className="inline-flex w-full rounded-full bg-black/[0.04] p-1 border border-black/10 mb-4">
+              <div className="inline-flex w-full rounded-full bg-white/[0.06] p-1 border border-white/10 mb-4">
                 <button
                   type="button"
                   className={`flex-1 rounded-full px-4 py-2 text-sm transition ${
                     authTab === 'login' || authTab === 'forgot'
-                      ? 'bg-white text-[#051A24] shadow'
-                      : 'text-[#051A24]/70 hover:text-[#051A24]'
+                      ? 'bg-white text-black shadow'
+                      : 'text-white/62 hover:text-white'
                   }`}
                   onClick={() => {
                     setAuthTab('login');
@@ -4154,7 +4170,7 @@ export function AdminWidget() {
                 <button
                   type="button"
                   className={`flex-1 rounded-full px-4 py-2 text-sm transition ${
-                    authTab === 'signup' ? 'bg-white text-[#051A24] shadow' : 'text-[#051A24]/70 hover:text-[#051A24]'
+                    authTab === 'signup' ? 'bg-white text-black shadow' : 'text-white/62 hover:text-white'
                   }`}
                   onClick={() => {
                     setAuthTab('signup');
@@ -4169,7 +4185,7 @@ export function AdminWidget() {
                 <>
                   <div className="grid grid-cols-1 gap-3">
                     <div>
-                      <div className="text-xs font-medium text-[#051A24]/80 mb-2">E-posta</div>
+                      <div className="text-xs font-medium text-white/72 mb-2">E-posta</div>
                       <input
                         value={loginEmail}
                         onChange={(e) => {
@@ -4178,7 +4194,7 @@ export function AdminWidget() {
                         }}
                         type="email"
                         placeholder="yonetici@mail.com"
-                        className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
+                        className="w-full rounded-[8px] border border-white/12 bg-white/[0.06] px-3 py-2 text-sm text-white outline-none placeholder:text-white/34 focus:border-white/34"
                         autoFocus
                       />
                     </div>
@@ -4192,7 +4208,7 @@ export function AdminWidget() {
                         }}
                         type="password"
                         placeholder="1234"
-                        className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
+                        className="w-full rounded-[8px] border border-white/12 bg-white/[0.06] px-3 py-2 text-sm text-white outline-none placeholder:text-white/34 focus:border-white/34"
                       />
                     </div>
                   </div>
@@ -4224,14 +4240,14 @@ export function AdminWidget() {
                         }
                         setOpen(false);
                       }}
-                      className="flex-1 rounded-full bg-[#051A24] text-white px-4 py-2 text-sm shadow hover:opacity-90 active:scale-95 transition"
+                      className="flex-1 rounded-full bg-white px-4 py-2 text-sm text-black shadow hover:bg-white/90 active:scale-95 transition"
                     >
                       Devam et
                     </button>
                     <button
                       type="button"
                       onClick={() => setOpen(false)}
-                      className="rounded-full bg-white text-[#051A24] px-4 py-2 text-sm border border-black/10 hover:bg-black/[0.02] active:scale-95 transition"
+                      className="rounded-full border border-white/14 bg-white/[0.06] px-4 py-2 text-sm text-white/72 hover:text-white active:scale-95 transition"
                     >
                       İptal
                     </button>
@@ -4246,13 +4262,13 @@ export function AdminWidget() {
 
                   <div className="grid grid-cols-1 gap-3">
                     <div>
-                      <div className="text-xs font-medium text-[#051A24]/80 mb-2">E-posta</div>
+                      <div className="text-xs font-medium text-white/72 mb-2">E-posta</div>
                       <input
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
                         type="email"
                         placeholder="name@company.com"
-                        className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
+                        className="w-full rounded-[8px] border border-white/12 bg-white/[0.06] px-3 py-2 text-sm text-white outline-none placeholder:text-white/34 focus:border-white/34"
                         autoFocus
                       />
                     </div>
@@ -4261,7 +4277,7 @@ export function AdminWidget() {
                   <div className="mt-4 flex gap-2">
                     <button
                       type="button"
-                      className="flex-1 text-center rounded-full bg-[#051A24] text-white px-4 py-2 text-sm shadow hover:opacity-90 active:scale-95 transition"
+                      className="flex-1 text-center rounded-full bg-white px-4 py-2 text-sm text-black shadow hover:bg-white/90 active:scale-95 transition"
                       onClick={async () => {
                         try {
                           setError(null);
@@ -4280,7 +4296,7 @@ export function AdminWidget() {
                     </button>
                     <button
                       type="button"
-                      className="rounded-full bg-white text-[#051A24] px-4 py-2 text-sm border border-black/10 hover:bg-black/[0.02] active:scale-95 transition"
+                      className="rounded-full border border-white/14 bg-white/[0.06] px-4 py-2 text-sm text-white/72 hover:text-white active:scale-95 transition"
                       onClick={() => setAuthTab('login')}
                     >
                       Geri dön
@@ -4295,17 +4311,17 @@ export function AdminWidget() {
                       <input
                         value={signupName}
                         onChange={(e) => setSignupName(e.target.value)}
-                        className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
+                        className="w-full rounded-[8px] border border-white/12 bg-white/[0.06] px-3 py-2 text-sm text-white outline-none placeholder:text-white/34 focus:border-white/34"
                         placeholder="Ad Soyad"
                         autoFocus
                       />
                     </div>
                     <div>
-                      <div className="text-xs font-medium text-[#051A24]/80 mb-2">E-posta</div>
+                      <div className="text-xs font-medium text-white/72 mb-2">E-posta</div>
                       <input
                         value={signupEmail}
                         onChange={(e) => setSignupEmail(e.target.value)}
-                        className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
+                        className="w-full rounded-[8px] border border-white/12 bg-white/[0.06] px-3 py-2 text-sm text-white outline-none placeholder:text-white/34 focus:border-white/34"
                         placeholder="name@company.com"
                       />
                     </div>
@@ -4314,7 +4330,7 @@ export function AdminWidget() {
                       <input
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}
-                        className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
+                        className="w-full rounded-[8px] border border-white/12 bg-white/[0.06] px-3 py-2 text-sm text-white outline-none placeholder:text-white/34 focus:border-white/34"
                         placeholder="En az 6 karakter"
                         type="password"
                       />
@@ -4330,14 +4346,14 @@ export function AdminWidget() {
                     </div>
                   </div>
 
-                  <div className="text-[11px] text-[#051A24]/60 mt-3">
+                  <div className="hidden">
                     Kayıt olunca hesabın veritabanına kaydedilir. Admin rolü “Kullanıcı yönetimi” ekranından görüntüleyebilir.
                   </div>
 
                   <div className="flex gap-2 mt-4">
                     <button
                       type="button"
-                      className="flex-1 text-center rounded-full bg-[#051A24] text-white px-4 py-2 text-sm shadow hover:opacity-90 active:scale-95 transition"
+                      className="flex-1 text-center rounded-full bg-white px-4 py-2 text-sm text-black shadow hover:bg-white/90 active:scale-95 transition"
                       onClick={async () => {
                         setError(null);
                         const ok = await signupCustomer({
@@ -4358,7 +4374,7 @@ export function AdminWidget() {
                     <button
                       type="button"
                       onClick={() => setOpen(false)}
-                      className="rounded-full bg-white text-[#051A24] px-4 py-2 text-sm border border-black/10 hover:bg-black/[0.02] active:scale-95 transition"
+                      className="rounded-full border border-white/14 bg-white/[0.06] px-4 py-2 text-sm text-white/72 hover:text-white active:scale-95 transition"
                     >
                       Kapat
                     </button>
