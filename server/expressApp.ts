@@ -370,8 +370,16 @@ function iyzipaySecretKey(): string {
   ).trim();
 }
 
+function normalizeIyzipayUri(raw: string): string {
+  const value = stripUtf8Bom(raw).trim().replace(/\/+$/, '');
+  if (!value) return '';
+  if (value.startsWith('https://') || value.startsWith('http://')) return value;
+  if (value.startsWith('//')) return `https:${value}`;
+  return `https://${value}`;
+}
+
 function iyzipayUri(): string {
-  const explicit = String(process.env.IYZIPAY_URI || process.env.IYZICO_URI || '').trim();
+  const explicit = normalizeIyzipayUri(String(process.env.IYZIPAY_URI || process.env.IYZICO_URI || ''));
   if (explicit) return explicit;
   const k = iyzipayApiKey();
   if (k.startsWith('sandbox-')) return 'https://sandbox-api.iyzipay.com';
