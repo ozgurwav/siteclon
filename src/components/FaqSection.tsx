@@ -16,18 +16,18 @@ const FAQ_KEY = 'site.faq.items.v1';
 const DEFAULT_FAQS: FaqItem[] = [
   {
     id: 'shoot-duration',
-    question: 'Çekim ne kadar sürüyor?',
-    answer: 'Seçilen pakete göre değişir. Kısa çekimler genelde 1 saat, detaylı dış çekimler 2-3 saat sürer.',
+    question: 'Ürün teslimatı ne kadar sürüyor?',
+    answer: 'Teslimat süresi ürün, ölçü ve stok durumuna göre netleşir. Hazır ürünlerde süreç daha hızlı ilerler.',
   },
   {
     id: 'delivery-time',
-    question: 'Fotoğraflar ne zaman teslim edilir?',
-    answer: 'Seçki ve düzenleme yoğunluğuna göre teslim tarihi netleşir. Ortalama teslim süresi çekimden sonra paylaşılır.',
+    question: 'Ölçüye özel ürün hazırlanıyor mu?',
+    answer: 'Halı ve perde seçeneklerinde ölçüye göre yönlendirme yapılabilir. Net ölçü ve kumaş/renk tercihiyle fiyatlandırma belirlenir.',
   },
   {
     id: 'booking',
-    question: 'Tarih ayırmak için ne yapmalıyım?',
-    answer: 'WhatsApp veya takvim üzerinden bize ulaşabilirsin. Müsaitlik kontrolünden sonra paket ve saat netleştirilir.',
+    question: 'Sipariş için ne yapmalıyım?',
+    answer: 'Ürünü sepete ekleyebilir veya iletişim bilgileri üzerinden mağazayla görüşebilirsin. Stok ve teslimat bilgisi sipariş öncesi netleştirilir.',
   },
 ];
 
@@ -78,12 +78,12 @@ export function FaqSection() {
               <EditableText assetKey="site.faq.kicker" defaultValue="Sık sorulanlar" as="span" />
             </div>
             <h2 className="mt-2 text-[30px] md:text-[44px] leading-[1.06] font-serif font-semibold tracking-tight text-[#051A24]">
-              <EditableText assetKey="site.faq.title" defaultValue="Çekim öncesi aklındaki sorular" as="span" />
+              <EditableText assetKey="site.faq.title" defaultValue="Alışveriş öncesi aklındaki sorular" as="span" />
             </h2>
             <p className="mt-3 max-w-2xl text-sm md:text-base leading-relaxed text-[#051A24]/70">
               <EditableText
                 assetKey="site.faq.subtitle"
-                defaultValue="Tarih, paket, teslim ve çekim süreciyle ilgili en çok sorulan cevapları burada topladık."
+                defaultValue="Ürün, ölçü, teslimat ve ödeme süreciyle ilgili en çok sorulan cevapları burada topladık."
                 as="span"
                 multiline
               />

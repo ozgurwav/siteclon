@@ -689,7 +689,7 @@ async function startIyzipayCheckoutForBooking(
   }
 
   const minor = BigInt(row.deposit_minor || '0');
-  if (minor <= 0n) return { ok: false, reason: 'amount', iyzico: { errorMessage: 'Kapora tutarı 0' } };
+  if (minor <= 0n) return { ok: false, reason: 'amount', iyzico: { errorMessage: 'Ön ödeme tutarı 0' } };
 
   const { Iyzipay, client } = newIyzipayClient();
   const priceStr = (Number(minor) / 100).toFixed(2);
@@ -727,9 +727,9 @@ async function startIyzipayCheckoutForBooking(
 
   const basketItem = {
     id: `deposit-${bookingId}`,
-    name: `Kapora — ${row.category_name || 'Randevu'}`,
+    name: `Ön ödeme — ${row.category_name || 'Sipariş'}`,
     category1: 'Hizmet',
-    category2: 'Fotograf',
+    category2: 'Ev Tekstili',
     itemType: Iyzipay.BASKET_ITEM_TYPE.VIRTUAL,
     price: priceStr,
   };

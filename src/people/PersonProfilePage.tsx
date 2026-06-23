@@ -25,7 +25,7 @@ export function PersonProfilePage() {
   }, [personId]);
 
   const keyBase = person?.keyBase || 'testimonialSection';
-  const defaultPortrait = person?.imageDefault || '';
+  const defaultDetailImage = person?.imageDefault || '';
 
   // Ensure any overscroll/background stays premium-black on this route.
   useEffect(() => {
@@ -54,7 +54,7 @@ export function PersonProfilePage() {
             </div>
 
             <div className="mt-3 text-[34px] md:text-[40px] leading-[1.05] font-semibold text-white tracking-tight">
-              <EditableText assetKey={`${keyBase}.author`} defaultValue="Retro Fotoğraf Ekibi" as="span" />
+              <EditableText assetKey={`${keyBase}.author`} defaultValue="Ezgi Halı Perde Ekibi" as="span" />
             </div>
 
             <div className="mt-6 text-sm md:text-base text-white/75 leading-relaxed max-w-xl">
@@ -71,13 +71,13 @@ export function PersonProfilePage() {
           </div>
         </div>
 
-        {/* Right portrait */}
+        {/* Right product detail */}
         <div className="w-full md:w-[56%] bg-black flex items-center justify-center">
           <div className="w-full h-[56vh] md:h-screen">
             <EditableAsset
               assetKey={`${keyBase}.portrait`}
-              defaultValue={defaultPortrait}
-              alt="Portrait"
+              defaultValue={defaultDetailImage}
+              alt="Ürün detayı"
               kind="auto"
               className="w-full h-full object-cover"
             />

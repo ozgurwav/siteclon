@@ -223,7 +223,7 @@ export function PortfolioGalleryPage({ galleryIdOverride, titleOverride }: Portf
               {title}
             </div>
             <div className="text-sm text-[#0D212C]/70 mt-2">
-              {kind === 'photo' ? 'Fotoğraf albümü' : kind === 'video' ? 'Video albümü' : 'Fotoğraf + video'}
+              {kind === 'photo' ? 'Ürün galerisi' : kind === 'video' ? 'Vitrin videosu' : 'Ürün + detay'}
             </div>
           </div>
 
@@ -326,7 +326,7 @@ export function PortfolioGalleryPage({ galleryIdOverride, titleOverride }: Portf
             <div className="mt-3 text-sm md:text-base text-[#0D212C]/80 leading-relaxed">
               <EditableText
                 assetKey={`${GALLERY_LIST_PREFIX}.${galleryId}.blocks.0.body`}
-                defaultValue="Bu bölümde videolar ve fotoğraflar birlikte akıyor. Admin modda metni düzenleyip portfolyoyu hikayeleştirebilirsin."
+                defaultValue="Bu bölümde ürün görselleri ve detayları birlikte akar. Admin modda metni düzenleyip vitrini mağazaya göre şekillendirebilirsin."
                 as="span"
                 multiline
               />
@@ -381,7 +381,7 @@ export function PortfolioGalleryPage({ galleryIdOverride, titleOverride }: Portf
               <div className="rounded-2xl border border-black/10 bg-white overflow-hidden">
                 <div className="p-4 md:p-5">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm text-[#0D212C]/70">Film strip</div>
+                    <div className="text-sm text-[#0D212C]/70">Detay şeridi</div>
                     {isAdmin && displayed[filmIndex] ? (
                       <button
                         type="button"
@@ -407,7 +407,7 @@ export function PortfolioGalleryPage({ galleryIdOverride, titleOverride }: Portf
                     <EditableAsset
                       assetKey={displayed[filmIndex]?.assetKey || `${GALLERY_LIST_PREFIX}.${galleryId}.media.__empty`}
                       defaultValue={GALLERY_PLACEHOLDER_IMAGE}
-                      alt="Fotoğraf"
+                      alt="Ürün görseli"
                       kind="image"
                       className="w-full max-h-[70vh] object-contain rounded-2xl"
                       onDelete={isAdmin && displayed[filmIndex] ? () => removeMediaItem(displayed[filmIndex].id) : undefined}
@@ -467,7 +467,7 @@ export function PortfolioGalleryPage({ galleryIdOverride, titleOverride }: Portf
                       <EditableAsset
                         assetKey={m.assetKey}
                         defaultValue={GALLERY_PLACEHOLDER_IMAGE}
-                        alt="Fotoğraf"
+                        alt="Ürün görseli"
                         kind="image"
                         className="w-full aspect-square object-cover"
                         onDelete={isAdmin ? () => removeMediaItem(m.id) : undefined}
@@ -505,7 +505,7 @@ export function PortfolioGalleryPage({ galleryIdOverride, titleOverride }: Portf
                       <EditableAsset
                         assetKey={m.assetKey}
                         defaultValue={GALLERY_PLACEHOLDER_IMAGE}
-                        alt="Fotoğraf"
+                        alt="Ürün görseli"
                         kind="image"
                         className="w-full h-auto rounded-2xl object-cover shadow-sm"
                         onDelete={isAdmin ? () => removeMediaItem(m.id) : undefined}
@@ -531,7 +531,7 @@ export function PortfolioGalleryPage({ galleryIdOverride, titleOverride }: Portf
             <div className="mt-3 text-sm md:text-base text-[#0D212C]/80 leading-relaxed">
               <EditableText
                 assetKey={`${GALLERY_LIST_PREFIX}.${galleryId}.blocks.1.body`}
-                defaultValue="İstersen burada çekim süreci, ekip, mekan, teslimat gibi bilgileri yazıp portfolyoyu daha premium hale getirebilirsin."
+                defaultValue="İstersen burada ürün seçimi, ölçü, teslimat ve mağaza süreci gibi bilgileri yazıp vitrini daha premium hale getirebilirsin."
                 as="span"
                 multiline
               />

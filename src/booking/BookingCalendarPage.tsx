@@ -106,7 +106,7 @@ function slotIsPast(dateIso: string | null, slotStart: string | null) {
   return slotMinutes <= nowMinutes;
 }
 
-/** Ödeme popup'ı kapanınca takvim sekmesine haber vermek için (PaymentSuccessPage ile aynı string). */
+/** Ödeme popup'ı kapanınca sepet ekranına haber vermek için (PaymentSuccessPage ile aynı string). */
 const IYZICO_PAYMENT_PAID_MESSAGE = 'aiag:iyzico-payment-paid';
 
 function openIyzicoCheckoutHtml(html: string): boolean {
@@ -376,8 +376,8 @@ export function BookingCalendarPage() {
         kind: 'ok',
         text:
           Number.isFinite(bookingId) && bookingId > 0
-            ? `Kapora alındı. Rezervasyon #${bookingId} onaylandı.`
-            : 'Kapora alındı. Randevunuz onaylandı.',
+            ? `Ön ödeme alındı. Sipariş #${bookingId} onaylandı.`
+            : 'Ön ödeme alındı. Siparişiniz onaylandı.',
       });
       void loadBooked();
       void loadAdmin();
@@ -387,7 +387,7 @@ export function BookingCalendarPage() {
   }, [loadBooked, loadAdmin]);
 
   const patchBookingStatus = async (id: number, status: 'confirmed' | 'cancelled' | 'hidden') => {
-    if (status === 'hidden' && !window.confirm('Bu randevu admin listesinden gizlensin mi?')) return;
+    if (status === 'hidden' && !window.confirm('Bu sipariş admin listesinden gizlensin mi?')) return;
     setStatusBusyId(id);
     try {
       const res = await fetch(`/api/bookings/${id}/status`, {
@@ -408,7 +408,7 @@ export function BookingCalendarPage() {
   };
 
   const deleteBooking = async (id: number) => {
-    if (!window.confirm('Bu randevu tamamen silinsin mi? Bu işlem geri alınamaz.')) return;
+    if (!window.confirm('Bu sipariş tamamen silinsin mi? Bu işlem geri alınamaz.')) return;
     setStatusBusyId(id);
     try {
       const res = await fetch(`/api/bookings/${id}`, {
@@ -464,7 +464,7 @@ export function BookingCalendarPage() {
     e.preventDefault();
     setMessage(null);
     if (!categoryId) {
-      setMessage({ kind: 'err', text: 'Lütfen çekim türünü seç.' });
+      setMessage({ kind: 'err', text: 'Lütfen ürün türünü seç.' });
       return;
     }
     if (!selectedDate || !selectedSlot) {
@@ -472,7 +472,7 @@ export function BookingCalendarPage() {
       return;
     }
     if (slotIsPast(selectedDate, selectedSlot)) {
-      setMessage({ kind: 'err', text: 'Geçmiş saat için randevu alınamaz. Lütfen ileri bir saat seçin.' });
+      setMessage({ kind: 'err', text: 'Geçmiş saat için sipariş planlanamaz. Lütfen ileri bir saat seçin.' });
       setSelectedSlot(null);
       return;
     }
@@ -531,7 +531,7 @@ export function BookingCalendarPage() {
         } else {
           setMessage({
             kind: 'ok',
-            text: 'Rezervasyon oluşturuldu. Ödeme penceresinde kart bilgilerinizi girin; kapora tamamlandığında randevu otomatik onaylanır.',
+            text: 'Sipariş oluşturuldu. Ödeme penceresinde kart bilgilerinizi girin; ön ödeme tamamlandığında sipariş otomatik onaylanır.',
           });
           setPaymentRetry(null);
         }
@@ -990,7 +990,7 @@ export function BookingCalendarPage() {
 
               <form onSubmit={onSubmit} className="space-y-3 border-t border-black/10 pt-4">
                 <div>
-                  <label className={cn('block text-xs text-[#051A24]/70 mb-1', labelFont)}>Çekim türü</label>
+                  <label className={cn('block text-xs text-[#051A24]/70 mb-1', labelFont)}>Ürün türü</label>
                   <select
                     value={categoryId ?? ''}
                     onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : null)}
@@ -1079,7 +1079,7 @@ export function BookingCalendarPage() {
                 {paymentRetry ? (
                   <div className="rounded-xl border border-amber-200/80 bg-amber-50/90 px-3 py-3 space-y-2">
                     <p className={cn('text-xs text-amber-950/90 leading-relaxed', bodyFont)}>
-                      Kapora ödemesi henüz tamamlanmadı (rezervasyon #{paymentRetry.bookingId}). Ödeme penceresini buradan
+                      Ön ödeme henüz tamamlanmadı (sipariş #{paymentRetry.bookingId}). Ödeme penceresini buradan
                       yeniden açabilirsiniz.
                     </p>
                     <button
@@ -1087,7 +1087,7 @@ export function BookingCalendarPage() {
                       onClick={() => setPaymentRetry(null)}
                       className={cn('text-[11px] text-amber-900/70 underline underline-offset-2', bodyFont)}
                     >
-                      Kapora beklemesini kapat
+                      Ön ödeme beklemesini kapat
                     </button>
                     <button
                       type="button"
@@ -1148,7 +1148,7 @@ export function BookingCalendarPage() {
                           setPaymentRetry(null);
                           setMessage({
                             kind: 'ok',
-                            text: 'Ödeme penceresi açıldı. İşlemi tamamladığınızda randevu otomatik onaylanır.',
+                            text: 'Ödeme penceresi açıldı. İşlemi tamamladığınızda sipariş otomatik onaylanır.',
                           });
                         } finally {
                           setPaymentRetryBusy(false);
@@ -1159,7 +1159,7 @@ export function BookingCalendarPage() {
                         bodyFont,
                       )}
                     >
-                      {paymentRetryBusy ? '…' : 'Kapora ödemesini başlat'}
+                      {paymentRetryBusy ? '…' : 'Ön ödemeyi başlat'}
                     </button>
                   </div>
                 ) : null}
@@ -1285,7 +1285,7 @@ export function BookingCalendarPage() {
             <div className="mt-8 pt-6 border-t border-black/10">
               <div className="flex items-center justify-between gap-4">
                 <h4 className={cn('font-semibold text-base md:text-lg tracking-tight text-[#051A24]', titleFont)}>
-                  Çekim türleri & kapora
+                  Ürün türleri & ön ödeme
                 </h4>
                 <button
                   type="button"
@@ -1309,11 +1309,11 @@ export function BookingCalendarPage() {
                       'w-full rounded-xl border border-black/12 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/15',
                       bodyFont,
                     )}
-                    placeholder="Düğün çekimi"
+                    placeholder="Premium halı"
                   />
                 </div>
                 <div>
-                  <label className={cn('block text-xs text-[#051A24]/70 mb-1', labelFont)}>Kapora (TRY)</label>
+                  <label className={cn('block text-xs text-[#051A24]/70 mb-1', labelFont)}>Ön ödeme (TRY)</label>
                   <input
                     value={newCatDeposit}
                     onChange={(e) => setNewCatDeposit(onlyDigits(e.target.value))}
@@ -1372,7 +1372,7 @@ export function BookingCalendarPage() {
                   <thead>
                     <tr className={cn('border-b border-black/10 text-[#051A24]/50 text-xs uppercase tracking-[0.1em]', labelFont)}>
                       <th className="py-2.5 pr-3 font-medium">Ad</th>
-                      <th className="py-2.5 pr-3 font-medium">Kapora</th>
+                      <th className="py-2.5 pr-3 font-medium">Ön ödeme</th>
                       <th className="py-2.5 pr-3 font-medium">Aktif</th>
                       <th className="py-2.5 pr-3 font-medium">İşlem</th>
                     </tr>

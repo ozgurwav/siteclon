@@ -7,7 +7,7 @@ async function main() {
     if (cnt === 0) {
       await prisma.bookingCategory.create({
         data: {
-          name: 'Genel Çekim',
+          name: 'Genel Ürün',
           depositAmountMinor: BigInt(50000),
           currency: 'try',
           active: true,

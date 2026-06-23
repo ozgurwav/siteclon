@@ -68,7 +68,7 @@ function newId() {
 const ICONS = [
   { id: 'camera', label: 'Kamera', Icon: Camera },
   { id: 'aperture', label: 'Aperture', Icon: Aperture },
-  { id: 'image', label: 'Fotoğraf', Icon: Image },
+  { id: 'image', label: 'Görsel', Icon: Image },
   { id: 'scanFace', label: 'Biyometrik', Icon: ScanFace },
   { id: 'mapPin', label: 'Dış Mekan', Icon: MapPin },
   { id: 'compass', label: 'Lokasyon', Icon: Compass },
@@ -263,7 +263,7 @@ export function PricingSection() {
   };
 
   const commonLinks = [
-    { id: '/calendar', label: 'Takvim (/calendar)' },
+    { id: '/calendar', label: 'Mağaza (#hali)' },
     { id: '/packages', label: 'Paketler (/packages)' },
     { id: '/paketler', label: 'Paketler (/paketler)' },
     { id: '/inbox', label: 'Gelen Kutusu (/inbox)' },
@@ -288,7 +288,7 @@ export function PricingSection() {
             <EditableText assetKey="services.kicker" defaultValue="Hizmetlerimiz" as="span" />
           </div>
           <h2 className="mt-5 text-[34px] sm:text-[44px] leading-[1.06] font-serif font-semibold tracking-tight text-[#051A24]">
-            <EditableText assetKey="services.title" defaultValue="Her çekim için ayrı bir kalite standardı." as="span" />
+            <EditableText assetKey="services.title" defaultValue="Her mekan için ayrı bir dokuma standardı." as="span" />
           </h2>
           <p className="mt-3 max-w-2xl text-sm sm:text-base leading-relaxed text-[#051A24]/70">
             <EditableText
@@ -308,7 +308,7 @@ export function PricingSection() {
                 window.location.href = toNavigationHref(primaryHref, '/calendar');
               }}
             >
-              <EditableText assetKey="services.cta.primary" defaultValue="Takvime Git" as="span" />
+              <EditableText assetKey="services.cta.primary" defaultValue="Ürünlere Git" as="span" />
             </Button>
             <Button
               variant="secondary"
@@ -548,7 +548,7 @@ export function PricingSection() {
           </span>
           <span className="inline-flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-[#051A24]/40" />
-            <EditableText assetKey="services.footer.p2" defaultValue="Planlı çekim: zaman kaybı yok." as="span" />
+            <EditableText assetKey="services.footer.p2" defaultValue="Planlı seçim: net fiyat, net teslimat." as="span" />
           </span>
           <span className="inline-flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-[#051A24]/40" />
@@ -611,7 +611,7 @@ export function PricingSection() {
                   ))}
                 </select>
                 <div className="mt-1 text-[11px] text-[#051A24]/55">
-                  Sadece aktif butonlar, acilir menu alt ogeleri, Takvim ve WhatsApp secilebilir.
+                  Sadece aktif butonlar, açılır menü alt öğeleri, mağaza ve WhatsApp seçilebilir.
                 </div>
               </div>
 

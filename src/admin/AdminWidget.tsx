@@ -5,8 +5,8 @@ import {
   DEFAULT_LOOP_MEDIA_URLS,
   DEFAULT_SALES_BANNER_MEDIA,
   HOMEPAGE_PROJECT_ROWS,
-  WEDDING_PHOTO_URLS,
-  WEDDING_PORTRAIT_URLS,
+  PRODUCT_MEDIA_URLS,
+  PRODUCT_DETAIL_MEDIA_URLS,
 } from '../lib/defaultSiteMedia';
 import {
   clearAsset,
@@ -315,11 +315,11 @@ export function AdminWidget() {
   );
   const { value: brandTitle, setValue: setBrandTitle, reset: resetBrandTitle } = useEditableAsset(
     'brand.title',
-    'Retro Fotoğraf & Video Atölyesi',
+    'Ezgi Halı Perde',
   );
   const { value: brandTaglineText, setValue: setBrandTaglineText, reset: resetBrandTaglineText } = useEditableAsset(
     'brand.tagline',
-    'Wedding • Portrait • Film',
+    'Halı • Perde • Dokuma',
   );
   const [brandLogoDraft, setBrandLogoDraft] = useState(brandLogoUrl);
   const [brandLogoModeDraft, setBrandLogoModeDraft] = useState(brandLogoMode);
@@ -646,7 +646,7 @@ export function AdminWidget() {
         <div className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {renderAssetTextField('services.kicker', 'Etiket', 'Hizmetlerimiz')}
-            {renderAssetTextField('services.title', 'Baslik', 'Her çekim için ayrı bir kalite standardı.')}
+            {renderAssetTextField('services.title', 'Baslik', 'Her mekan için ayrı bir dokuma standardı.')}
           </div>
           {renderAssetTextField(
             'services.subtitle',
@@ -655,12 +655,12 @@ export function AdminWidget() {
             true,
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {renderAssetTextField('services.cta.primary', 'Buton 1 yazisi', 'Takvime Git')}
+            {renderAssetTextField('services.cta.primary', 'Buton 1 yazisi', 'Ürünlere Git')}
             {renderAssetTextField('services.cta.secondary', 'Buton 2 yazisi', 'Paketler')}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {renderAssetTextField('services.footer.p1', 'Alt not 1', 'Teslimler net: seçki + retouch.')}
-            {renderAssetTextField('services.footer.p2', 'Alt not 2', 'Planlı çekim: zaman kaybı yok.')}
+            {renderAssetTextField('services.footer.p2', 'Alt not 2', 'Planlı seçim: net fiyat, net teslimat.')}
             {renderAssetTextField('services.footer.p3', 'Alt not 3', 'Premium ışık + renk standardı.')}
           </div>
         </div>
@@ -761,7 +761,7 @@ export function AdminWidget() {
         <div className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {renderAssetTextField('site.faq.kicker', 'Etiket', 'Sık sorulanlar')}
-            {renderAssetTextField('site.faq.title', 'Baslik', 'Çekim öncesi aklındaki sorular')}
+            {renderAssetTextField('site.faq.title', 'Baslik', 'Alışveriş öncesi aklındaki sorular')}
           </div>
           {renderAssetTextField(
             'site.faq.subtitle',
@@ -784,11 +784,11 @@ export function AdminWidget() {
             {renderAssetTextField('testimonialSectionStatic.title.italic', 'Vurgulu parca', 'bizimle ')}
             {renderAssetTextField('testimonialSectionStatic.title.suffix', 'Baslik son parca', 'ölümsüzleşir.')}
           </div>
-          {renderAssetTextField('testimonialSectionStatic.author', 'Imza / alt metin', 'Retro Fotoğraf & Video Atölyesi')}
+          {renderAssetTextField('testimonialSectionStatic.author', 'Imza / alt metin', 'Ezgi Halı Perde')}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {renderAssetTextField('testimonialSection.badge1', 'Kelime 1', 'Düğün')}
             {renderAssetTextField('testimonialSection.badge2', 'Kelime 2', 'Portre')}
-            {renderAssetTextField('testimonialSection.badge3', 'Kelime 3', 'Film')}
+            {renderAssetTextField('testimonialSection.badge3', 'Kelime 3', 'Dokuma')}
           </div>
         </div>
       );
@@ -797,8 +797,8 @@ export function AdminWidget() {
     return null;
   };
 
-  const applyWeddingPresentationMedia = () => {
-    const marquee = WEDDING_PHOTO_URLS.join('\n');
+  const applyProductPresentationMedia = () => {
+    const marquee = PRODUCT_MEDIA_URLS.join('\n');
     setMarqueeUrls(marquee);
     setMarqueeDraft(marquee);
     syncMarqueeSlotsToAssets(marquee);
@@ -806,31 +806,31 @@ export function AdminWidget() {
     HOMEPAGE_PROJECT_ROWS.forEach((row, idx) => {
       writeAsset(`projects.${row.title}.title`, row.title);
       writeAsset(`projects.${row.title}.description`, row.description);
-      writeAsset(`projects.${row.title}.image`, WEDDING_PHOTO_URLS[idx === 0 ? 0 : idx === 1 ? 2 : 5]);
+      writeAsset(`projects.${row.title}.image`, PRODUCT_MEDIA_URLS[idx === 0 ? 0 : idx === 1 ? 2 : 5]);
     });
 
-    writeAsset('hero.backgroundMedia', WEDDING_PHOTO_URLS[1]);
-    writeAsset('hero.backgroundPlaylist', WEDDING_PHOTO_URLS.join('\n'));
-    writeAsset('site.salesBanner.media', WEDDING_PHOTO_URLS[6]);
+    writeAsset('hero.backgroundMedia', PRODUCT_MEDIA_URLS[1]);
+    writeAsset('hero.backgroundPlaylist', PRODUCT_MEDIA_URLS.join('\n'));
+    writeAsset('site.salesBanner.media', PRODUCT_MEDIA_URLS[6]);
     writeAsset('site.salesBanner.width', 'full');
     writeAsset('site.salesBanner.heightPx', '420');
     writeAsset('site.salesBanner.overlay.position', 'center-left');
     writeAsset('site.salesBanner.overlay.color', 'light');
     writeAsset('site.salesBanner.overlay.title', 'Düğün Hikayenizi Birlikte Yazalım');
-    writeAsset('site.salesBanner.overlay.subtitle', 'Fotoğraf • Video • Albüm');
+    writeAsset('site.salesBanner.overlay.subtitle', 'Halı • Perde • Ev Tekstili');
     writeAsset('site.salesBanner.cta.enabled', '1');
     writeAsset('site.salesBanner.cta.href', '/calendar');
-    writeAsset('site.salesBanner.cta.label', 'Randevu al');
+    writeAsset('site.salesBanner.cta.label', 'Ürünleri incele');
 
     writeAsset('testimonialSectionStatic.title.prefix', 'Anılarınız ');
     writeAsset('testimonialSectionStatic.title.italic', 'bizimle ');
     writeAsset('testimonialSectionStatic.title.suffix', 'ölümsüzleşir.');
-    writeAsset('testimonialSectionStatic.author', 'Retro Fotoğraf & Video Atölyesi');
+    writeAsset('testimonialSectionStatic.author', 'Ezgi Halı Perde');
     writeAsset('testimonialSection.badge1', 'Düğün');
     writeAsset('testimonialSection.badge2', 'Portre');
-    writeAsset('testimonialSection.badge3', 'Film');
+    writeAsset('testimonialSection.badge3', 'Dokuma');
 
-    const people = WEDDING_PORTRAIT_URLS.map((url, idx) => {
+    const people = PRODUCT_DETAIL_MEDIA_URLS.map((url, idx) => {
       const id = `demo-person-${idx + 1}`;
       const keyBase = `people.${id}`;
       writeAsset(`${keyBase}.portrait`, url);
@@ -1526,8 +1526,8 @@ export function AdminWidget() {
 
           <div className="flex min-w-0 items-center justify-end gap-2 max-md:max-w-[calc(100vw-2rem)] max-md:overflow-x-auto max-md:pb-1">
           <div className="hidden">
-          <a className={pillClass} {...toolbarLinkProps(calendarHrefResolved)} aria-label="Takvim" title="Takvim">
-            Takvim
+          <a className={pillClass} {...toolbarLinkProps(calendarHrefResolved)} aria-label="Mağaza" title="Mağaza">
+            Mağaza
           </a>
           {resolvedButtons.map((b) => {
             if (b.type === 'link') {
@@ -1727,7 +1727,7 @@ export function AdminWidget() {
                       {...toolbarLinkProps(calendarHrefResolved)}
                       onClick={() => setCustomerMenuOpen(false)}
                     >
-                      Takvim — randevu
+                      Mağaza — ürünler
                     </a>
                     <a
                       className="block w-full px-4 py-3 text-sm text-left hover:bg-black/[0.02] transition border-t border-black/10"
@@ -1965,7 +1965,7 @@ export function AdminWidget() {
                           );
                         }}
                         className="w-full rounded-[8px] border border-white/12 bg-white/[0.06] px-3 py-2 text-sm text-white outline-none placeholder:text-white/34 focus:border-white/34"
-                        placeholder="Örn: Takvim"
+                        placeholder="Örn: Mağaza"
                       />
                     </div>
 
@@ -2295,7 +2295,7 @@ export function AdminWidget() {
                                       }}
                                       className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10 bg-white"
                                     >
-                                      <option value="photo">Fotoğraf</option>
+                                      <option value="photo">Ürün görseli</option>
                                       <option value="video">Video</option>
                                       <option value="mixed">Karışık</option>
                                     </select>
@@ -2317,7 +2317,7 @@ export function AdminWidget() {
                                     >
                                       <option value="masonry">Masonry</option>
                                       <option value="edge">Edge-to-edge</option>
-                                      <option value="film">Film strip</option>
+                                      <option value="film">Detay şeridi</option>
                                     </select>
                                   </div>
                                 ) : (it as any).type === 'packages' ? (
@@ -2590,13 +2590,13 @@ export function AdminWidget() {
                   <div>
                     <div className="text-sm font-semibold text-[#051A24]">Hızlı başlangıç</div>
                     <div className="text-xs text-[#051A24]/70 mt-1">
-                      Sunum için düğün/fotoğrafçılık görsellerini otomatik doldurabilir, sonra aşağıdan tek tek düzenleyebilirsin.
+                      Sunum için halı ve perde vitrini görsellerini otomatik doldurabilir, sonra aşağıdan tek tek düzenleyebilirsin.
                     </div>
                   </div>
                   <button
                     type="button"
                     className="hidden rounded-full bg-[#051A24] text-white px-4 py-2 text-sm shadow hover:opacity-90 active:scale-95 transition"
-                    onClick={applyWeddingPresentationMedia}
+                    onClick={applyProductPresentationMedia}
                   >
                     Düğün temalı medyaları uygula
                   </button>
@@ -3268,7 +3268,7 @@ export function AdminWidget() {
                       value={brandTitleDraft}
                       onChange={(e) => setBrandTitleDraft(e.target.value)}
                       className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
-                      placeholder="Retro Fotoğraf & Video Atölyesi"
+                      placeholder="Ezgi Halı Perde"
                     />
                   </div>
                 </div>
@@ -3277,7 +3277,7 @@ export function AdminWidget() {
                   value={brandTaglineDraft}
                   onChange={(e) => setBrandTaglineDraft(e.target.value)}
                   className="w-full rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black/10"
-                  placeholder="Wedding • Portrait • Film"
+                  placeholder="Halı • Perde • Dokuma"
                 />
                 <div className="text-xs font-medium text-[#051A24]/80 mt-3 mb-2">Logo URL (SVG/PNG önerilir)</div>
                 <input
@@ -3295,7 +3295,7 @@ export function AdminWidget() {
                       const mode =
                         brandLogoModeDraft === 'logo' || brandLogoModeDraft === 'behindText' ? brandLogoModeDraft : 'text';
                       setBrandLogoMode(mode);
-                      setBrandTitle(brandTitleDraft.trim() || 'Retro Fotoğraf & Video Atölyesi');
+                      setBrandTitle(brandTitleDraft.trim() || 'Ezgi Halı Perde');
                       setBrandTaglineText(brandTaglineDraft.trim());
                       setBrandLogoUrl(brandLogoDraft.trim());
                     }}
@@ -3312,8 +3312,8 @@ export function AdminWidget() {
                       resetBrandTaglineText();
                       setBrandLogoDraft('');
                       setBrandLogoModeDraft('text');
-                      setBrandTitleDraft('Retro Fotoğraf & Video Atölyesi');
-                      setBrandTaglineDraft('Wedding • Portrait • Film');
+                      setBrandTitleDraft('Ezgi Halı Perde');
+                      setBrandTaglineDraft('Halı • Perde • Dokuma');
                     }}
                   >
                     Reset
@@ -3340,7 +3340,7 @@ export function AdminWidget() {
                 <div className="text-sm font-semibold text-[#051A24] mb-3">Hero playlist (foto + video)</div>
                 <div className="rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2 mb-3">
                   <div className="text-xs text-[#051A24]/70">
-                    Her satıra 1 URL. Fotoğraf/gif anında görünür; video’lar sırayla oynar. Hepsi bitince başa döner.
+                    Her satıra 1 URL. Ürün görseli veya vitrin medyası anında görünür; videolar sırayla oynar. Hepsi bitince başa döner.
                   </div>
                 </div>
                 <div className="rounded-xl border border-black/10 bg-black/[0.02] px-3 py-2 mb-3">
@@ -3360,8 +3360,8 @@ export function AdminWidget() {
                 <div className="mb-3 rounded-xl border border-black/10 bg-white p-3">
                   <div className="text-xs font-semibold text-[#051A24] mb-3">Hero metinleri</div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {renderAssetTextField('hero.title', 'Ana baslik', 'Retro Fotoğraf & Video Atölyesi')}
-                    {renderAssetTextField('hero.subtitle', 'Kucuk alt baslik', 'The Photograph Studio')}
+                    {renderAssetTextField('hero.title', 'Ana baslik', 'Ezgi Halı Perde')}
+                    {renderAssetTextField('hero.subtitle', 'Kucuk alt baslik', 'Premium Ev Tekstili')}
                   </div>
                   <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                     {renderAssetTextField('hero.line1.prefix', 'Vurgu satiri 1', 'Aşkın En Güzel ')}

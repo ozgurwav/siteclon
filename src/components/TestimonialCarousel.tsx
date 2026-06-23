@@ -30,7 +30,7 @@ const DEFAULT_TESTIMONIALS: TestimonialItem[] = [
     name: 'Alex Wu',
     role: 'Founder, Nexgate',
     content:
-      'Ekip, düğün çekimimizin bütün akışını çok rahat yönetti. Albüm ve video teslimi beklediğimizden çok daha iyiydi.',
+      'Salonumuz için seçtiğimiz halı ve perdeler mekana çok daha sıcak, premium bir hava kattı.',
     avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150',
   },
   {
@@ -38,7 +38,7 @@ const DEFAULT_TESTIMONIALS: TestimonialItem[] = [
     name: 'James Mitchell',
     role: 'VP Product, LaunchPad',
     content:
-      'Çekim günü doğal pozları yakalamaları ve renk düzeni gerçekten çok hoşumuza gitti.',
+      'Renk ve doku konusunda çok iyi yönlendirdiler; ürünler evde beklediğimizden daha kaliteli durdu.',
     avatar: 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=150',
   },
   {
@@ -53,7 +53,7 @@ const DEFAULT_TESTIMONIALS: TestimonialItem[] = [
     name: 'David Zhang',
     role: 'Head of Design, Paradigm Labs',
     content:
-      'Başından sonuna kadar ilgiliydiler. Fotoğraflar hem zarif hem de çok samimi duruyor.',
+      'Başından sonuna kadar ilgiliydiler. Ölçü, ürün ve teslimat süreci çok net ilerledi.',
     avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150',
   },
 ];

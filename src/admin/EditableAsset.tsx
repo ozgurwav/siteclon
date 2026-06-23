@@ -39,7 +39,7 @@ function getAssetHint(assetKey: string, kind: 'image' | 'video'): AssetHint {
     };
   }
 
-  // Portrait area under "I left Apple" (now carousel)
+  // Product detail media area
   if (k.includes('portrait') || k.includes('people.')) {
     return {
       title: kind === 'video' ? 'Portre video' : 'Portre görsel',

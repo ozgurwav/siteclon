@@ -6,7 +6,7 @@ import { EditableAsset } from '../admin/EditableAsset';
 import { EditableText } from '../admin/EditableText';
 import { useAdmin } from '../admin/AdminContext';
 import { clearAsset, fileToDataUrl, readJsonAsset, useEditableAsset, writeAsset, writeJsonAsset } from '../admin/assets';
-import { WEDDING_PORTRAIT_URLS } from '../lib/defaultSiteMedia';
+import { PRODUCT_DETAIL_MEDIA_URLS } from '../lib/defaultSiteMedia';
 
 type Person = {
   id: string;
@@ -27,7 +27,7 @@ export function TestimonialSection() {
   const indexBeforeAdd = useRef(0);
   const [newName, setNewName] = useState('');
   const [newTitlePrefix, setNewTitlePrefix] = useState('I left ');
-  const [newTitleItalic, setNewTitleItalic] = useState('Apple');
+  const [newTitleItalic, setNewTitleItalic] = useState('dokuma');
   const [newTitleSuffix, setNewTitleSuffix] = useState(' to build the studio I always wanted to work with');
   const [newImageUrl, setNewImageUrl] = useState('');
   const [newImageFile, setNewImageFile] = useState<File | null>(null);
@@ -50,22 +50,22 @@ export function TestimonialSection() {
       {
         id: 'demo-person-1',
         keyBase: 'people.demo-person-1',
-        imageDefault: WEDDING_PORTRAIT_URLS[0],
+        imageDefault: PRODUCT_DETAIL_MEDIA_URLS[0],
       },
       {
         id: 'demo-person-2',
         keyBase: 'people.demo-person-2',
-        imageDefault: WEDDING_PORTRAIT_URLS[1],
+        imageDefault: PRODUCT_DETAIL_MEDIA_URLS[1],
       },
       {
         id: 'demo-person-3',
         keyBase: 'people.demo-person-3',
-        imageDefault: WEDDING_PORTRAIT_URLS[2],
+        imageDefault: PRODUCT_DETAIL_MEDIA_URLS[2],
       },
     ];
   }, []);
 
-  // Keep portrait sizing consistent with the original single-portrait layout (max-w-xs).
+  // Keep detail media sizing consistent with the original layout (max-w-xs).
   const CARD_W = 320;
   const GAP = 56;
   const VIEW_W = CARD_W * 2 + GAP;
@@ -115,7 +115,7 @@ export function TestimonialSection() {
   const { value: titleSuffixLive } = useEditableAsset(titleSuffixKey, 'ölümsüzleşir.');
   const prefixWantsGap = /[\s\u00A0]$/.test(titlePrefixLive || '');
   // Leading whitespace inside an inline element often collapses away visually; render an explicit gap.
-  const appleWantsGap = /[\s\u00A0]$/.test(titleItalicLive || '') || /^[\s\u00A0]/.test(titleSuffixLive || '');
+  const titleWantsGap = /[\s\u00A0]$/.test(titleItalicLive || '') || /^[\s\u00A0]/.test(titleSuffixLive || '');
 
   return (
     <section className="py-12 px-6 max-w-4xl mx-auto flex flex-col items-center text-center" ref={ref}>
@@ -139,7 +139,7 @@ export function TestimonialSection() {
         <span className="font-serif italic align-baseline">
           <EditableText assetKey={titleItalicKey} defaultValue="bizimle " as="span" preserveEdgeSpaces />
         </span>
-        {appleWantsGap ? <span aria-hidden className="inline-block w-[0.22em]" /> : null}
+        {titleWantsGap ? <span aria-hidden className="inline-block w-[0.22em]" /> : null}
         <EditableText
           assetKey={titleSuffixKey}
           defaultValue="ölümsüzleşir."
@@ -153,7 +153,7 @@ export function TestimonialSection() {
           isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         )}
       >
-        <EditableText assetKey={authorKey} defaultValue="Retro Fotoğraf & Video Atölyesi" as="span" />
+        <EditableText assetKey={authorKey} defaultValue="Ezgi Halı Perde" as="span" />
       </p>
 
       <div
@@ -169,7 +169,7 @@ export function TestimonialSection() {
           <EditableText assetKey="testimonialSection.badge2" defaultValue="Portre" as="span" />
         </span>
         <span className="text-2xl font-medium text-slate-900 w-[110px]">
-          <EditableText assetKey="testimonialSection.badge3" defaultValue="Film" as="span" />
+          <EditableText assetKey="testimonialSection.badge3" defaultValue="Dokuma" as="span" />
         </span>
       </div>
 
@@ -199,17 +199,17 @@ export function TestimonialSection() {
           ) : null}
         </div>
 
-        {/* Portrait carousel: same feel as testimonial cards */}
+        {/* Product detail carousel: same feel as testimonial cards */}
         {people.length <= 1 ? (
           <div className="flex justify-center">
             <div className="w-full max-w-xs">
               {/* Parallax transform can get clipped by carousel overflow during re-render.
-                  Keep portraits stable to avoid top cropping. */}
+                  Keep detail images stable to avoid top cropping. */}
               <div className="transition-transform duration-300">
                 <EditableAsset
                   assetKey={`${leftPerson.keyBase}.portrait`}
                   defaultValue={leftPerson.imageDefault}
-                  alt="Portrait"
+                  alt="Ürün detayı"
                   className="w-full h-auto rounded-2xl shadow-lg"
                 />
               </div>
@@ -271,7 +271,7 @@ export function TestimonialSection() {
                         role="button"
                         tabIndex={0}
                         className="block w-full text-left cursor-pointer"
-                        aria-label={`Select portrait ${i + 1}`}
+                        aria-label={`Ürün detayı seç ${i + 1}`}
                         onMouseEnter={() => {
                           if (!side) return;
                           setHoverSide(side);
@@ -313,7 +313,7 @@ export function TestimonialSection() {
                             <EditableAsset
                               assetKey={`${p.keyBase}.portrait`}
                               defaultValue={p.imageDefault}
-                              alt="Portrait"
+                              alt="Ürün detayı"
                               className={cn(
                                 "w-full h-auto rounded-2xl shadow-lg",
                                 activeSide && side
@@ -352,7 +352,7 @@ export function TestimonialSection() {
                                   <EditableText assetKey={`${displayPerson.keyBase}.label`} defaultValue="Kurucu" as="span" />
                                 </div>
                                 <div className="text-base font-semibold text-[#051A24]">
-                                  <EditableText assetKey={`${displayPerson.keyBase}.author`} defaultValue="Retro Fotoğraf Ekibi" as="span" />
+                                  <EditableText assetKey={`${displayPerson.keyBase}.author`} defaultValue="Ezgi Halı Perde Ekibi" as="span" />
                                 </div>
                                 <div className="text-sm text-[#051A24]/70 mt-3 leading-relaxed">
                                   <EditableText assetKey={`${displayPerson.keyBase}.extra`} defaultValue="Bu alana ek metin yazabilirsiniz." as="span" multiline />
@@ -376,7 +376,7 @@ export function TestimonialSection() {
           </div>
         )}
 
-        {/* (moved to overlay on left portrait for symmetry) */}
+        {/* (moved to overlay on left detail image for symmetry) */}
       </div>
 
       {addOpen ? (

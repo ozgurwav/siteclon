@@ -25,7 +25,7 @@ export function BottomNav() {
   const [waName, setWaName] = useState('');
   const [waDraft, setWaDraft] = useState('');
   const { value: waQuick1 } = useEditableAsset('whatsapp.quick.1', 'Fiyat bilgisi alabilir miyim?');
-  const { value: waQuick2 } = useEditableAsset('whatsapp.quick.2', 'Takvim uygunluğu soracaktım.');
+  const { value: waQuick2 } = useEditableAsset('whatsapp.quick.2', 'Ürün bilgisi almak istiyorum.');
   const { value: waQuick3 } = useEditableAsset('whatsapp.quick.3', 'Bir projeyi konuşalım mı?');
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -36,7 +36,7 @@ export function BottomNav() {
     { href: '/', labelKey: 'topNav.home', defaultLabel: 'ANA SAYFA' },
     { href: '/portfolio', labelKey: 'topNav.collections', defaultLabel: 'KOLEKSIYONLAR' },
     { href: '/packages', labelKey: 'topNav.rugs', defaultLabel: 'HALILAR' },
-    { href: '/takvim', labelKey: 'topNav.curtains', defaultLabel: 'PERDELER' },
+    { href: '#perde', labelKey: 'topNav.curtains', defaultLabel: 'PERDELER' },
   ];
 
   function goTo(href: string) {

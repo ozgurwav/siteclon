@@ -3,7 +3,7 @@ import { resolveToolbarButtonHref, toolbarSubItemHref } from './siteRoutes';
 export const SITE_LINK_TARGETS = [
   { value: '#', label: 'Kapali / yonlendirme yok' },
   { value: '/', label: 'Ana sayfa' },
-  { value: '/calendar', label: 'Takvim / randevu' },
+  { value: '/calendar', label: 'Sipariş / teslimat' },
   { value: '/inbox', label: 'Gelen kutusu' },
   { value: 'whatsapp', label: 'WhatsApp' },
   { value: '__custom__', label: 'Ozel link yaz' },
@@ -17,7 +17,7 @@ export const SAFE_SITE_LINK_TARGETS = SITE_LINK_TARGETS.filter(
 
 const CORE_NAV_TARGETS: SiteLinkTarget[] = [
   { value: '/', label: 'Ana sayfa' },
-  { value: '/calendar', label: 'Takvim / randevu' },
+  { value: '/calendar', label: 'Sipariş / teslimat' },
   { value: '/inbox', label: 'Gelen kutusu' },
   { value: 'whatsapp', label: 'WhatsApp' },
 ];

@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { cn } from '../lib/utils';
 import { Button } from '../components/Button';
 
-/** BookingCalendarPage ile aynı olmalı. */
+/** Sepet ödeme popup'ı ile aynı olmalı. */
 const IYZICO_PAYMENT_PAID_MESSAGE = 'aiag:iyzico-payment-paid';
 
 type LoadState =
   | { kind: 'loading' }
-  | { kind: 'ok'; paid: boolean; status: string; bookingId: number | null; source: 'stripe' | 'iyzico' }
+  | { kind: 'ok'; paid: boolean; status: string; orderId: number | null; source: 'stripe' | 'iyzico' }
   | { kind: 'err'; message: string };
 
 export function PaymentSuccessPage() {
@@ -42,14 +42,14 @@ export function PaymentSuccessPage() {
           const data = (await res.json().catch(() => null)) as any;
           if (!res.ok || !data?.ok) throw new Error('Ödeme kaydı doğrulanamadı.');
           const paid = Boolean(data.paid);
-          const bookingId = data?.booking_id != null ? Number(data.booking_id) : null;
+          const orderId = data?.booking_id != null ? Number(data.booking_id) : null;
           const status = paid ? 'paid' : String(data?.status || 'unknown');
           if (!cancelled)
             setState({
               kind: 'ok',
               paid,
               status,
-              bookingId: Number.isFinite(bookingId) ? bookingId : null,
+              orderId: Number.isFinite(orderId) ? orderId : null,
               source: 'iyzico',
             });
         } catch (e: any) {
@@ -69,14 +69,14 @@ export function PaymentSuccessPage() {
           const data = (await res.json().catch(() => null)) as any;
           if (!res.ok || !data?.ok) throw new Error('Ödeme doğrulanamadı.');
           const paid = String(data?.session?.payment_status || '') === 'paid' || String(data?.payment?.status || '') === 'paid';
-          const bookingId = data?.payment?.booking_id != null ? Number(data.payment.booking_id) : null;
+          const orderId = data?.payment?.booking_id != null ? Number(data.payment.booking_id) : null;
           const status = String(data?.payment?.status || data?.session?.payment_status || 'unknown');
           if (!cancelled)
             setState({
               kind: 'ok',
               paid,
               status,
-              bookingId: Number.isFinite(bookingId) ? bookingId : null,
+              orderId: Number.isFinite(orderId) ? orderId : null,
               source: 'stripe',
             });
         } catch (e: any) {
@@ -103,7 +103,7 @@ export function PaymentSuccessPage() {
     if (state.kind !== 'ok') return;
     document.title = state.paid ? 'Ödeme alındı' : 'Ödeme sonucu';
     return () => {
-      document.title = 'My Google AI Studio App';
+      document.title = 'Ezgi Halı Perde';
     };
   }, [state]);
 
@@ -120,7 +120,7 @@ export function PaymentSuccessPage() {
               type: IYZICO_PAYMENT_PAID_MESSAGE,
               paid: true,
               paymentRequestId: prNum,
-              bookingId: state.bookingId ?? null,
+              orderId: state.orderId ?? null,
             },
             window.location.origin,
           );
@@ -157,11 +157,11 @@ export function PaymentSuccessPage() {
               ) : (
                 <p className="mt-2 text-xs text-[#051A24]/60 break-all">Makbuz: #{paymentReceiptId}</p>
               )}
-              {state.bookingId ? (
-                <p className="mt-2 text-xs text-[#051A24]/60">Rezervasyon: #{state.bookingId}</p>
+              {state.orderId ? (
+                <p className="mt-2 text-xs text-[#051A24]/60">Sipariş: #{state.orderId}</p>
               ) : null}
               {showOpenerHint ? (
-                <p className="mt-3 text-xs text-[#051A24]/55">Takvim sekmesine geçiriliyor; bu pencere kapanacak.</p>
+                <p className="mt-3 text-xs text-[#051A24]/55">Sepet ekranına dönülüyor; bu pencere kapanacak.</p>
               ) : null}
             </>
           )}
@@ -179,10 +179,10 @@ export function PaymentSuccessPage() {
                   window.close();
                   return;
                 }
-                window.location.assign('/calendar');
+                window.location.assign('/');
               }}
             >
-              Takvime dön
+              Mağazaya dön
             </Button>
             <Button
               variant="secondary"
@@ -212,4 +212,3 @@ export function PaymentSuccessPage() {
     </main>
   );
 }
-
