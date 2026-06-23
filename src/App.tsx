@@ -182,7 +182,7 @@ export default function App() {
       id,
       kind,
       name: draft.name.trim(),
-      price: draft.price.trim(),
+      price: onlyDigits(draft.price),
       image: draft.image,
     });
     setDraft({ name: '', price: '', image: '' });
@@ -250,7 +250,10 @@ export default function App() {
             setEditingContact(true);
           }}
           onSave={() => {
-            void set(dbRef(realtimeDb, 'settings/contact'), contactDraft);
+            void set(dbRef(realtimeDb, 'settings/contact'), {
+              ...contactDraft,
+              phone: onlyDigits(contactDraft.phone),
+            });
             setEditingContact(false);
           }}
           onCancel={() => setEditingContact(false)}
@@ -479,8 +482,9 @@ function ProductPage({
             />
             <input
               value={draft.price}
-              onChange={(event) => setDraft((current) => ({ ...current, price: event.target.value }))}
+              onChange={(event) => setDraft((current) => ({ ...current, price: onlyDigits(event.target.value) }))}
               className="h-11 border border-white/12 bg-black px-3 text-sm text-white outline-none placeholder:text-white/34 focus:border-white/35"
+              inputMode="numeric"
               placeholder="Fiyat"
             />
             <input
@@ -581,7 +585,7 @@ function ContactPage({
             </button>
           ) : (
             <div className="grid gap-3">
-              <input value={draft.phone} onChange={(e) => setDraft((c) => ({ ...c, phone: e.target.value }))} className="h-11 border border-white/12 bg-black px-3 text-white outline-none" placeholder="Telefon" />
+              <input value={draft.phone} onChange={(e) => setDraft((c) => ({ ...c, phone: onlyDigits(e.target.value) }))} className="h-11 border border-white/12 bg-black px-3 text-white outline-none" inputMode="numeric" placeholder="Telefon" />
               <input value={draft.email} onChange={(e) => setDraft((c) => ({ ...c, email: e.target.value }))} className="h-11 border border-white/12 bg-black px-3 text-white outline-none" placeholder="E-posta" />
               <input value={draft.address} onChange={(e) => setDraft((c) => ({ ...c, address: e.target.value }))} className="h-11 border border-white/12 bg-black px-3 text-white outline-none" placeholder="Adres" />
               <div className="flex gap-2">
@@ -718,6 +722,10 @@ function normalizeHomeContent(raw: Partial<HomeContent> | null | undefined): Hom
 function updateHomeStat(content: HomeContent, index: number, patch: Partial<HomeStat>): HomeContent {
   const stats = normalizeHomeContent(content).stats.map((stat, i) => (i === index ? { ...stat, ...patch } : stat));
   return { ...content, stats };
+}
+
+function onlyDigits(value: string): string {
+  return value.replace(/\D/g, '');
 }
 
 function whatsappNumber(raw: string): string {
