@@ -354,12 +354,21 @@ function bookingSlotEnd(start: string): string | null {
   return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
 }
 
+function normalizeSecretEnv(raw: string): string {
+  const value = stripUtf8Bom(raw).trim();
+  const unquoted =
+    (value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))
+      ? value.slice(1, -1)
+      : value;
+  return unquoted.replace(/\s+/g, '');
+}
+
 function iyzipayApiKey(): string {
-  return stripUtf8Bom(String(process.env.IYZIPAY_API_KEY || process.env.SANDBOX_API_KEY || '')).trim();
+  return normalizeSecretEnv(String(process.env.IYZIPAY_API_KEY || process.env.SANDBOX_API_KEY || ''));
 }
 
 function iyzipaySecretKey(): string {
-  return stripUtf8Bom(
+  return normalizeSecretEnv(
     String(
       process.env.IYZIPAY_SECRET_KEY ||
         process.env.SANDBOX_SECRET_KEY ||
