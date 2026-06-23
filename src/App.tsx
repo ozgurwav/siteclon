@@ -21,6 +21,19 @@ type ContactInfo = {
   email: string;
 };
 
+type HomeStat = {
+  value: string;
+  label: string;
+};
+
+type HomeContent = {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  stats: HomeStat[];
+};
+
 const ADMIN_EMAIL = 'admin@ezgihali.com';
 const ADMIN_PASSWORD = 'admin123';
 
@@ -37,6 +50,18 @@ const starterContact: ContactInfo = {
   email: 'info@ezgihaliperde.com',
 };
 
+const starterHomeContent: HomeContent = {
+  eyebrow: 'Premium halı • perde • dokuma',
+  title: 'Ezgi Halı Perde',
+  subtitle: 'Mekana ölçülü, sade ve kalıcı bir dokunuş.',
+  description: 'Seçili halı ve perde koleksiyonlarıyla evinize rafine bir bütünlük kazandırıyoruz.',
+  stats: [
+    { value: '20+', label: 'Yılı aşkın tecrübe' },
+    { value: 'Özel', label: 'Ölçü ve ürün danışmanlığı' },
+    { value: 'Premium', label: 'Halı, perde ve ev tekstili' },
+  ],
+};
+
 export default function App() {
   const [page, setPage] = useState<Page>(() => pageFromHash());
   const [authOpen, setAuthOpen] = useState(false);
@@ -51,6 +76,9 @@ export default function App() {
   const [draft, setDraft] = useState({ name: '', price: '', image: '' });
   const [contactDraft, setContactDraft] = useState(contact);
   const [editingContact, setEditingContact] = useState(false);
+  const [homeContent, setHomeContent] = useState<HomeContent>(starterHomeContent);
+  const [homeDraft, setHomeDraft] = useState<HomeContent>(starterHomeContent);
+  const [editingHome, setEditingHome] = useState(false);
 
   useEffect(() => {
     const sync = () => setPage(pageFromHash());
@@ -86,6 +114,23 @@ export default function App() {
     });
     return unsub;
   }, []);
+
+  useEffect(() => {
+    const homeRef = dbRef(realtimeDb, 'settings/home');
+    const unsub = onValue(homeRef, (snapshot) => {
+      const raw = snapshot.val() as HomeContent | null;
+      if (!raw) {
+        void set(homeRef, starterHomeContent);
+        setHomeContent(starterHomeContent);
+        setHomeDraft(starterHomeContent);
+        return;
+      }
+      const next = normalizeHomeContent(raw);
+      setHomeContent(next);
+      if (!editingHome) setHomeDraft(next);
+    });
+    return unsub;
+  }, [editingHome]);
 
   const visibleProducts = useMemo(() => {
     if (page !== 'hali' && page !== 'perde') return [];
@@ -157,7 +202,29 @@ export default function App() {
         onLogout={() => setIsAdmin(false)}
       />
 
-      {page === 'home' ? <HomePage /> : null}
+      {page === 'home' ? (
+        <HomePage
+          content={homeContent}
+          isAdmin={isAdmin}
+          editing={editingHome}
+          draft={homeDraft}
+          setDraft={setHomeDraft}
+          onEdit={() => {
+            setHomeDraft(homeContent);
+            setEditingHome(true);
+          }}
+          onSave={() => {
+            const next = normalizeHomeContent(homeDraft);
+            void set(dbRef(realtimeDb, 'settings/home'), next);
+            setHomeContent(next);
+            setEditingHome(false);
+          }}
+          onCancel={() => {
+            setHomeDraft(homeContent);
+            setEditingHome(false);
+          }}
+        />
+      ) : null}
       {page === 'hali' || page === 'perde' ? (
         <ProductPage
           kind={page}
@@ -271,36 +338,94 @@ function SiteHeader({
   );
 }
 
-function HomePage() {
+function HomePage({
+  content,
+  isAdmin,
+  editing,
+  draft,
+  setDraft,
+  onEdit,
+  onSave,
+  onCancel,
+}: {
+  content: HomeContent;
+  isAdmin: boolean;
+  editing: boolean;
+  draft: HomeContent;
+  setDraft: React.Dispatch<React.SetStateAction<HomeContent>>;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
+}) {
   return (
-    <section className="relative flex min-h-[100dvh] items-center justify-center px-6 pt-20">
-      <div className="mx-auto flex w-full max-w-[620px] flex-col items-center text-center">
-        <h1 className="font-serif text-[48px] font-semibold leading-[1.04] tracking-tight md:text-[68px]">
-          Zamana Direnen
-          <br />
-          Dokuma
+    <section className="relative flex min-h-[100dvh] items-center justify-center px-6 pb-16 pt-32">
+      <div className="mx-auto flex w-full max-w-[880px] flex-col items-center text-center">
+        <p className="font-mono text-xs uppercase tracking-[0.22em] text-white/58">{content.eyebrow}</p>
+        <h1 className="mt-6 text-[48px] font-semibold leading-[0.98] tracking-[0.02em] md:text-[78px]">
+          {content.title}
         </h1>
-        <p className="mt-7 font-mono text-xs uppercase tracking-[0.18em] text-white/76">
-          PREMIUM HALI • PERDE • EV TEKSTILI
-        </p>
-        <div className="mt-5 text-[38px] leading-[1.06] md:text-[54px]">
-          Evin ritmini <span className="font-serif italic">dokuyla</span> kur,
-          <br />
-          mekanı <span className="font-serif italic">sessiz lüksle</span>
-          <br />
-          tamamla.
+        <p className="mt-7 max-w-[620px] text-[24px] leading-tight text-white md:text-[34px]">{content.subtitle}</p>
+        <p className="mt-5 max-w-[540px] text-sm leading-relaxed text-white/62 md:text-base">{content.description}</p>
+
+        <div className="mt-10 grid w-full gap-3 md:grid-cols-3">
+          {content.stats.slice(0, 3).map((stat, index) => (
+            <div key={`${stat.value}-${index}`} className="border border-white/10 bg-white/[0.035] px-5 py-4 text-left">
+              <div className="text-[26px] font-semibold leading-none text-white">{stat.value}</div>
+              <div className="mt-3 text-xs uppercase tracking-[0.16em] text-white/48">{stat.label}</div>
+            </div>
+          ))}
         </div>
-        <div className="mt-8 flex max-w-[660px] flex-col gap-5 text-[15px] leading-relaxed text-white/82 md:text-base">
-          <p>
-            Ezgi Halı Perde; seçili iplikler, zamansız desenler ve rafine renk paletleriyle yaşam
-            alanlarına sıcaklık ve karakter kazandırır.
-          </p>
-          <p>
-            Halı, perde ve ev tekstili koleksiyonlarımız modern iç mekanlarla uyumlu, uzun ömürlü
-            ve dokunulduğunda kalite hissi veren parçalar için tasarlanır.
-          </p>
-          <p className="font-semibold text-white">Yeni sezon koleksiyonlarını keşfet.</p>
-        </div>
+
+        {isAdmin ? (
+          <div className="mt-8 w-full border border-white/12 bg-white/[0.035] p-4 text-left">
+            {!editing ? (
+              <button type="button" className="bg-white px-5 py-2 text-sm font-medium text-black" onClick={onEdit}>
+                Ana sayfa metinlerini düzenle
+              </button>
+            ) : (
+              <div className="grid gap-3">
+                <TextField label="Üst küçük yazı" value={draft.eyebrow} onChange={(value) => setDraft((c) => ({ ...c, eyebrow: value }))} placeholder="Premium halı • perde • dokuma" />
+                <TextField label="Başlık" value={draft.title} onChange={(value) => setDraft((c) => ({ ...c, title: value }))} placeholder="Ezgi Halı Perde" />
+                <TextField label="Alt başlık" value={draft.subtitle} onChange={(value) => setDraft((c) => ({ ...c, subtitle: value }))} placeholder="Mekana ölçülü, sade ve kalıcı bir dokunuş." />
+                <label className="grid gap-2 text-sm text-white/72">
+                  Kısa açıklama
+                  <textarea
+                    value={draft.description}
+                    onChange={(event) => setDraft((c) => ({ ...c, description: event.target.value }))}
+                    className="min-h-20 resize-none border border-white/12 bg-white/[0.06] px-3 py-3 text-white outline-none placeholder:text-white/34 focus:border-white/35"
+                    placeholder="Kısa açıklama"
+                  />
+                </label>
+                <div className="grid gap-3 md:grid-cols-3">
+                  {draft.stats.slice(0, 3).map((stat, index) => (
+                    <div key={index} className="grid gap-2 border border-white/10 p-3">
+                      <TextField
+                        label={`Kutu ${index + 1} başlığı`}
+                        value={stat.value}
+                        onChange={(value) => setDraft((c) => updateHomeStat(c, index, { value }))}
+                        placeholder="20+"
+                      />
+                      <TextField
+                        label={`Kutu ${index + 1} metni`}
+                        value={stat.label}
+                        onChange={(value) => setDraft((c) => updateHomeStat(c, index, { label: value }))}
+                        placeholder="Yılı aşkın tecrübe"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" className="bg-white px-5 py-2 text-sm font-medium text-black" onClick={onSave}>
+                    Kaydet
+                  </button>
+                  <button type="button" className="border border-white/12 px-5 py-2 text-sm text-white/78" onClick={onCancel}>
+                    Vazgeç
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -346,7 +471,7 @@ function ProductPage({
             <Edit3 className="h-4 w-4" />
             Admin ürün düzenleme
           </div>
-          <div className="grid gap-3 md:grid-cols-[1fr_160px_180px_auto]">
+          <div className="grid gap-3 md:grid-cols-[1fr_160px_1fr_180px_auto]">
             <input
               value={draft.name}
               onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
@@ -359,9 +484,15 @@ function ProductPage({
               className="h-11 border border-white/12 bg-black px-3 text-sm text-white outline-none placeholder:text-white/34 focus:border-white/35"
               placeholder="Fiyat"
             />
+            <input
+              value={draft.image}
+              onChange={(event) => setDraft((current) => ({ ...current, image: event.target.value }))}
+              className="h-11 border border-white/12 bg-black px-3 text-sm text-white outline-none placeholder:text-white/34 focus:border-white/35"
+              placeholder="Görsel linki"
+            />
             <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 border border-white/12 bg-black px-3 text-sm text-white/78 transition hover:text-white">
               <Upload className="h-4 w-4" />
-              Görsel seç
+              Dosya seç
               <input className="hidden" type="file" accept="image/*" onChange={(event) => void onImage(event.target.files?.[0] || null)} />
             </label>
             <button
@@ -568,6 +699,26 @@ function pageFromHash(): Page {
   if (hash === 'perde' || hash === 'perdeler') return 'perde';
   if (hash === 'iletisim') return 'iletisim';
   return 'home';
+}
+
+function normalizeHomeContent(raw: Partial<HomeContent> | null | undefined): HomeContent {
+  const statsRaw = Array.isArray(raw?.stats) ? raw?.stats : [];
+  const stats = [0, 1, 2].map((index) => ({
+    value: String(statsRaw[index]?.value || starterHomeContent.stats[index].value),
+    label: String(statsRaw[index]?.label || starterHomeContent.stats[index].label),
+  }));
+  return {
+    eyebrow: String(raw?.eyebrow || starterHomeContent.eyebrow),
+    title: String(raw?.title || starterHomeContent.title),
+    subtitle: String(raw?.subtitle || starterHomeContent.subtitle),
+    description: String(raw?.description || starterHomeContent.description),
+    stats,
+  };
+}
+
+function updateHomeStat(content: HomeContent, index: number, patch: Partial<HomeStat>): HomeContent {
+  const stats = normalizeHomeContent(content).stats.map((stat, i) => (i === index ? { ...stat, ...patch } : stat));
+  return { ...content, stats };
 }
 
 function whatsappNumber(raw: string): string {
