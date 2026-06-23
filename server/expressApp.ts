@@ -239,17 +239,33 @@ const DEMO_ENABLED = Boolean(DEMO_EMAIL && DEMO_PASSWORD);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-app.get('/api/health', (_req, res) =>
-  res.json({
+function safeEnvProbe(value: string) {
+  return {
+    present: Boolean(value),
+    length: value.length,
+    startsWithSandbox: value.startsWith('sandbox-'),
+    assignmentPasted: /^[A-Z0-9_]+\s*=/.test(value),
+    hash8: value ? sha256Hex(value).slice(0, 8) : '',
+  };
+}
+
+app.get('/api/health', (_req, res) => {
+  const apiKey = iyzipayApiKey();
+  const secretKey = iyzipaySecretKey();
+  const uri = iyzipayUri();
+  return res.json({
     ok: true,
     iyzipay: {
       configured: iyzipayEnvConfigured(),
-      hasApiKey: Boolean(iyzipayApiKey()),
-      hasSecretKey: Boolean(iyzipaySecretKey()),
-      hasUri: Boolean(iyzipayUri()),
+      hasApiKey: Boolean(apiKey),
+      hasSecretKey: Boolean(secretKey),
+      hasUri: Boolean(uri),
+      uri,
+      apiKey: safeEnvProbe(apiKey),
+      secretKey: safeEnvProbe(secretKey),
     },
-  }),
-);
+  });
+});
 
 app.post('/api/auth/logout', (_req, res) => {
   res.clearCookie('aiag_session', { path: '/' });
