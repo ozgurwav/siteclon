@@ -51,7 +51,7 @@ const starterContact: ContactInfo = {
 };
 
 const starterHomeContent: HomeContent = {
-  eyebrow: 'Premium halı • perde • dokuma',
+  eyebrow: '',
   title: 'Ezgi Halı Perde',
   subtitle: 'Mekana ölçülü, sade ve kalıcı bir dokunuş.',
   description: 'Seçili halı ve perde koleksiyonlarıyla evinize rafine bir bütünlük kazandırıyoruz.',
@@ -304,9 +304,6 @@ function SiteHeader({
           <div className="text-[22px] font-semibold uppercase leading-none tracking-[0.18em] md:text-[24px]">
             EZGI HALI PERDE
           </div>
-          <div className="mt-2 text-[8px] font-semibold uppercase tracking-[0.38em] text-white/52 md:text-[9px]">
-            PREMIUM HALI • PERDE • DOKUMA
-          </div>
         </button>
 
         <nav className="hidden items-center justify-center gap-10 lg:flex">
@@ -360,7 +357,9 @@ function HomePage({
   return (
     <section className="relative flex min-h-[100dvh] items-center justify-center px-6 pb-16 pt-32">
       <div className="mx-auto flex w-full max-w-[880px] flex-col items-center text-center">
-        <p className="font-mono text-xs uppercase tracking-[0.22em] text-white/58">{content.eyebrow}</p>
+        {content.eyebrow.trim() ? (
+          <p className="font-mono text-xs uppercase tracking-[0.22em] text-white/58">{content.eyebrow}</p>
+        ) : null}
         <h1 className="mt-6 text-[48px] font-semibold leading-[0.98] tracking-[0.02em] md:text-[78px]">
           {content.title}
         </h1>
@@ -384,7 +383,7 @@ function HomePage({
               </button>
             ) : (
               <div className="grid gap-3">
-                <TextField label="Üst küçük yazı" value={draft.eyebrow} onChange={(value) => setDraft((c) => ({ ...c, eyebrow: value }))} placeholder="Premium halı • perde • dokuma" />
+                <TextField label="Üst küçük yazı" value={draft.eyebrow} onChange={(value) => setDraft((c) => ({ ...c, eyebrow: value }))} placeholder="Boş bırakılabilir" />
                 <TextField label="Başlık" value={draft.title} onChange={(value) => setDraft((c) => ({ ...c, title: value }))} placeholder="Ezgi Halı Perde" />
                 <TextField label="Alt başlık" value={draft.subtitle} onChange={(value) => setDraft((c) => ({ ...c, subtitle: value }))} placeholder="Mekana ölçülü, sade ve kalıcı bir dokunuş." />
                 <label className="grid gap-2 text-sm text-white/72">
@@ -708,7 +707,7 @@ function normalizeHomeContent(raw: Partial<HomeContent> | null | undefined): Hom
     label: String(statsRaw[index]?.label || starterHomeContent.stats[index].label),
   }));
   return {
-    eyebrow: String(raw?.eyebrow || starterHomeContent.eyebrow),
+    eyebrow: String(raw?.eyebrow ?? starterHomeContent.eyebrow),
     title: String(raw?.title || starterHomeContent.title),
     subtitle: String(raw?.subtitle || starterHomeContent.subtitle),
     description: String(raw?.description || starterHomeContent.description),
