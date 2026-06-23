@@ -18,11 +18,7 @@ if (vitePort && vitePort !== String(preferredPort)) {
   );
 }
 // eslint-disable-next-line no-console
-console.log('[aiag] iyzipay anahtarları yüklü mü:', {
-  hasApiKey: Boolean(process.env.IYZIPAY_API_KEY?.trim()),
-  hasSecretKey: Boolean(process.env.IYZIPAY_SECRET_KEY?.trim()),
-  hasUri: Boolean((process.env.IYZIPAY_URI || '').trim()),
-});
+console.log('[aiag] ödeme sistemi kapalı; ürün siparişleri WhatsApp üzerinden alınır.');
 
 const portStrict = process.env.PORT_STRICT === '1';
 const maxPortAttempts = portStrict ? 1 : 24;

@@ -671,7 +671,7 @@ export function PackagesPage({
             href={normalizePackageHref(ctaHrefDraft)}
             className="inline-flex items-center justify-center rounded-full bg-[#051A24] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-95 active:scale-95 transition"
           >
-            <EditableText assetKey={bannerKey(it.id, 'cta.label')} defaultValue="Sepete ekle" as="span" />
+            <EditableText assetKey={bannerKey(it.id, 'cta.label')} defaultValue="WhatsApp'tan bilgi al" as="span" />
           </a>
         </div>
       ) : null}

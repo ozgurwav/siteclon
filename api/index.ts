@@ -4,7 +4,6 @@ import apiHandler from '../server/expressApp.js';
 
 export const runtime = 'nodejs';
 
-// Ensure Stripe webhook raw-body route works.
 export const config = {
   api: { bodyParser: false },
 };
@@ -33,4 +32,3 @@ export default function handler(req: IncomingMessage, res: ServerResponse) {
   restoreUrlFromVercelApiRewrite(req);
   return apiHandler(req, res);
 }
-

@@ -46,7 +46,6 @@ const RESERVED_LEGAL_SLUGS = new Set([
   'legal',
   'packages',
   'paketler',
-  'payment',
   'person',
   'portfolio',
   'reset-password',

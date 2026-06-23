@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Edit3, Minus, Plus, ShoppingBag, Trash2, Upload, X } from 'lucide-react';
+import { Edit3, MessageCircle, Plus, ShoppingBag, Trash2, Upload, X } from 'lucide-react';
 import { onValue, ref as dbRef, remove, set } from 'firebase/database';
 import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage';
 import { firebaseStorage, realtimeDb } from './lib/firebase';
@@ -19,14 +19,6 @@ type ContactInfo = {
   phone: string;
   address: string;
   email: string;
-};
-
-type CartItem = {
-  productId: string;
-  name: string;
-  price: string;
-  image: string;
-  quantity: number;
 };
 
 const ADMIN_EMAIL = 'admin@ezgihali.com';
@@ -59,10 +51,6 @@ export default function App() {
   const [draft, setDraft] = useState({ name: '', price: '', image: '' });
   const [contactDraft, setContactDraft] = useState(contact);
   const [editingContact, setEditingContact] = useState(false);
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [checkoutError, setCheckoutError] = useState('');
-  const [checkoutBusy, setCheckoutBusy] = useState(false);
 
   useEffect(() => {
     const sync = () => setPage(pageFromHash());
@@ -157,80 +145,6 @@ export default function App() {
 
   function removeProduct(id: string) {
     void remove(dbRef(realtimeDb, `products/${id}`));
-    setCart((current) => current.filter((item) => item.productId !== id));
-  }
-
-  function addToCart(product: Product) {
-    setCheckoutError('');
-    setCart((current) => {
-      const existing = current.find((item) => item.productId === product.id);
-      if (existing) {
-        return current.map((item) =>
-          item.productId === product.id ? { ...item, quantity: item.quantity + 1 } : item,
-        );
-      }
-      return [
-        ...current,
-        {
-          productId: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          quantity: 1,
-        },
-      ];
-    });
-    setCartOpen(true);
-  }
-
-  function updateCartQuantity(productId: string, delta: number) {
-    setCart((current) =>
-      current
-        .map((item) =>
-          item.productId === productId ? { ...item, quantity: Math.max(0, item.quantity + delta) } : item,
-        )
-        .filter((item) => item.quantity > 0),
-    );
-  }
-
-  async function checkoutWithIyzico() {
-    if (!cart.length) return;
-    setCheckoutBusy(true);
-    setCheckoutError('');
-    try {
-      const res = await fetch('/api/payments/iyzipay/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          buyer: {
-            name: name || 'Ezgi',
-            surname: 'Musteri',
-            email: email || 'sandbox@example.com',
-            phone: '+905000000000',
-            address: contact.address,
-          },
-          items: cart.map((item) => ({
-            id: item.productId,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-          })),
-        }),
-      });
-      const data = (await res.json().catch(() => null)) as any;
-      if (!res.ok || !data?.ok) throw new Error(data?.message || 'Ödeme başlatılamadı.');
-      const html = String(data?.iyzicoCheckout?.checkoutFormContent || '').trim();
-      if (!html) throw new Error('iyzico ödeme formu boş döndü.');
-      const win = window.open('', '_blank', 'width=520,height=760');
-      if (!win) throw new Error('Popup engellendi. Tarayıcıda popuplara izin ver.');
-      win.document.open();
-      win.document.write(html);
-      win.document.close();
-    } catch (error: any) {
-      setCheckoutError(error?.message || 'Ödeme başlatılamadı.');
-    } finally {
-      setCheckoutBusy(false);
-    }
   }
 
   return (
@@ -238,11 +152,9 @@ export default function App() {
       <SiteHeader
         page={page}
         isAdmin={isAdmin}
-        cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
         onNavigate={navigate}
         onAuth={() => openAuth('login')}
         onLogout={() => setIsAdmin(false)}
-        onCart={() => setCartOpen(true)}
       />
 
       {page === 'home' ? <HomePage /> : null}
@@ -256,7 +168,7 @@ export default function App() {
           onImage={handleImage}
           onAdd={addProduct}
           onRemove={removeProduct}
-          onAddToCart={addToCart}
+          contact={contact}
         />
       ) : null}
       {page === 'iletisim' ? (
@@ -294,16 +206,6 @@ export default function App() {
         />
       ) : null}
 
-      {cartOpen ? (
-        <CartPanel
-          cart={cart}
-          busy={checkoutBusy}
-          error={checkoutError}
-          onClose={() => setCartOpen(false)}
-          onQuantity={updateCartQuantity}
-          onCheckout={checkoutWithIyzico}
-        />
-      ) : null}
     </main>
   );
 }
@@ -311,19 +213,15 @@ export default function App() {
 function SiteHeader({
   page,
   isAdmin,
-  cartCount,
   onNavigate,
   onAuth,
   onLogout,
-  onCart,
 }: {
   page: Page;
   isAdmin: boolean;
-  cartCount: number;
   onNavigate: (page: Page) => void;
   onAuth: () => void;
   onLogout: () => void;
-  onCart: () => void;
 }) {
   const nav = [
     { page: 'home' as const, label: 'ANA SAYFA' },
@@ -360,14 +258,6 @@ function SiteHeader({
         </nav>
 
         <div className="flex items-center justify-end gap-2">
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-none border border-white/18 px-4 py-2 text-[13px] text-white/90 transition hover:border-white/35 hover:text-white"
-            onClick={onCart}
-          >
-            <ShoppingBag className="h-4 w-4" />
-            Sepet {cartCount ? `(${cartCount})` : ''}
-          </button>
           <button
             type="button"
             className="rounded-none border border-white/18 px-5 py-2 text-[13px] text-white/90 transition hover:border-white/35 hover:text-white"
@@ -425,7 +315,7 @@ function ProductPage({
   onImage,
   onAdd,
   onRemove,
-  onAddToCart,
+  contact,
 }: {
   kind: ProductKind;
   products: Product[];
@@ -435,7 +325,7 @@ function ProductPage({
   onImage: (file: File | null) => Promise<void>;
   onAdd: (kind: ProductKind) => void;
   onRemove: (id: string) => void;
-  onAddToCart: (product: Product) => void;
+  contact: ContactInfo;
 }) {
   const title = kind === 'hali' ? 'Halılar' : 'Perdeler';
 
@@ -445,7 +335,8 @@ function ProductPage({
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/45">Ezgi koleksiyon</p>
         <h1 className="font-serif text-[52px] font-semibold leading-none md:text-[72px]">{title}</h1>
         <p className="max-w-2xl text-white/60">
-          Satışa hazır ürün vitrini. Üye olmayan ziyaretçiler ürünleri görebilir; düzenleme alanı sadece admin girişinde görünür.
+          Ürünleri inceleyip ödeme ve sipariş detayları için WhatsApp üzerinden mağazayla iletişime geçebilirsiniz.
+          Düzenleme alanı sadece admin girişinde görünür.
         </p>
       </div>
 
@@ -509,10 +400,11 @@ function ProductPage({
               </div>
               <button
                 type="button"
-                className="mt-4 w-full border border-white/12 py-2 text-sm text-white/78 transition hover:border-white/35 hover:text-white"
-                onClick={() => onAddToCart(product)}
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 border border-white/12 py-2 text-sm text-white/78 transition hover:border-white/35 hover:text-white"
+                onClick={() => openWhatsAppForProduct(contact.phone, product)}
               >
-                Sepete ekle
+                <MessageCircle className="h-4 w-4" />
+                Ödeme için WhatsApp'tan iletişime geçin
               </button>
             </div>
           </article>
@@ -575,96 +467,6 @@ function ContactPage({
         </div>
       ) : null}
     </section>
-  );
-}
-
-function CartPanel({
-  cart,
-  busy,
-  error,
-  onClose,
-  onQuantity,
-  onCheckout,
-}: {
-  cart: CartItem[];
-  busy: boolean;
-  error: string;
-  onClose: () => void;
-  onQuantity: (productId: string, delta: number) => void;
-  onCheckout: () => void;
-}) {
-  const total = cart.reduce((sum, item) => sum + parsePrice(item.price) * item.quantity, 0);
-
-  return (
-    <div className="fixed inset-0 z-[80]">
-      <button type="button" className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <aside className="absolute bottom-0 right-0 top-0 flex w-full max-w-[430px] flex-col border-l border-white/12 bg-[#050505] text-white shadow-[0_28px_90px_rgba(0,0,0,0.65)]">
-        <div className="flex items-start justify-between border-b border-white/10 p-5">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/45">Sepet</div>
-            <h2 className="mt-2 text-2xl font-semibold">Sipariş özeti</h2>
-          </div>
-          <button type="button" className="text-white/52 transition hover:text-white" onClick={onClose} aria-label="Kapat">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-5">
-          {cart.length ? (
-            <div className="grid gap-3">
-              {cart.map((item) => (
-                <div key={item.productId} className="grid grid-cols-[72px_1fr] gap-3 border border-white/10 bg-white/[0.035] p-3">
-                  <div className="flex h-[72px] items-center justify-center bg-white/[0.05]">
-                    {item.image ? <img src={item.image} alt="" className="h-full w-full object-cover" /> : <ShoppingBag className="h-6 w-6 text-white/30" />}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium">{item.name}</div>
-                    <div className="mt-1 text-sm text-white/56">₺ {formatTRY(parsePrice(item.price))}</div>
-                    <div className="mt-3 flex items-center justify-between gap-3">
-                      <div className="inline-flex items-center border border-white/12">
-                        <button type="button" className="p-2 text-white/62 hover:text-white" onClick={() => onQuantity(item.productId, -1)} aria-label="Azalt">
-                          <Minus className="h-3.5 w-3.5" />
-                        </button>
-                        <span className="min-w-8 text-center text-sm">{item.quantity}</span>
-                        <button type="button" className="p-2 text-white/62 hover:text-white" onClick={() => onQuantity(item.productId, 1)} aria-label="Artır">
-                          <Plus className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                      <button type="button" className="text-xs text-white/45 underline underline-offset-4 hover:text-white" onClick={() => onQuantity(item.productId, -item.quantity)}>
-                        Çıkar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="border border-white/10 bg-white/[0.035] p-5 text-sm text-white/58">
-              Sepet şu an boş. Halılar veya Perdeler sayfasından ürün ekleyebilirsin.
-            </div>
-          )}
-        </div>
-
-        <div className="border-t border-white/10 p-5">
-          <div className="mb-4 flex items-center justify-between text-sm text-white/62">
-            <span>Toplam</span>
-            <strong className="text-xl text-white">₺ {formatTRY(total)}</strong>
-          </div>
-          {error ? <div className="mb-3 text-sm text-red-300">{error}</div> : null}
-          <button
-            type="button"
-            className="h-11 w-full bg-white text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-45"
-            disabled={!cart.length || busy}
-            onClick={onCheckout}
-          >
-            {busy ? 'Ödeme başlatılıyor...' : 'iyzico sandbox ile öde'}
-          </button>
-          <p className="mt-3 text-xs leading-relaxed text-white/40">
-            Sandbox için sunucuda IYZIPAY_API_KEY, IYZIPAY_SECRET_KEY ve IYZIPAY_URI değişkenleri gerekir.
-          </p>
-        </div>
-      </aside>
-    </div>
   );
 }
 
@@ -768,18 +570,19 @@ function pageFromHash(): Page {
   return 'home';
 }
 
-function parsePrice(value: string): number {
-  const normalized = String(value || '')
-    .replace(/[^\d,.-]/g, '')
-    .replace(/\./g, '')
-    .replace(',', '.');
-  const parsed = Number(normalized);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+function whatsappNumber(raw: string): string {
+  let digits = raw.replace(/\D/g, '');
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.startsWith('0')) digits = `90${digits.slice(1)}`;
+  if (digits.length === 10) digits = `90${digits}`;
+  return digits || '905550000000';
 }
 
-function formatTRY(value: number): string {
-  return new Intl.NumberFormat('tr-TR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
+function openWhatsAppForProduct(phone: string, product: Product) {
+  const message = [
+    `Merhaba, ${product.name} ürünü hakkında bilgi almak istiyorum.`,
+    `Fiyat: ₺ ${product.price}`,
+    'Ödeme ve sipariş detayları için yardımcı olur musunuz?',
+  ].join('\n');
+  window.open(`https://wa.me/${whatsappNumber(phone)}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
 }
