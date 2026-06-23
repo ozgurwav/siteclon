@@ -354,8 +354,24 @@ function bookingSlotEnd(start: string): string | null {
   return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
 }
 
-function normalizeSecretEnv(raw: string): string {
+function stripEnvAssignment(raw: string, names: string[]): string {
   const value = stripUtf8Bom(raw).trim();
+  const eq = value.indexOf('=');
+  if (eq <= 0) return value;
+  const key = value.slice(0, eq).trim().toUpperCase();
+  if (!names.includes(key)) return value;
+  return value.slice(eq + 1).trim();
+}
+
+function normalizeSecretEnv(raw: string): string {
+  const value = stripEnvAssignment(raw, [
+    'IYZIPAY_API_KEY',
+    'SANDBOX_API_KEY',
+    'IYZIPAY_SECRET_KEY',
+    'SANDBOX_SECRET_KEY',
+    'SANDBOX_SECURITY_KEY',
+    'IYZICO_SECRET_KEY',
+  ]);
   const unquoted =
     (value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))
       ? value.slice(1, -1)
@@ -380,7 +396,7 @@ function iyzipaySecretKey(): string {
 }
 
 function normalizeIyzipayUri(raw: string): string {
-  const value = stripUtf8Bom(raw).trim().replace(/\/+$/, '');
+  const value = stripEnvAssignment(raw, ['IYZIPAY_URI', 'IYZICO_URI']).replace(/\/+$/, '');
   if (!value) return '';
   if (value.startsWith('https://') || value.startsWith('http://')) return value;
   if (value.startsWith('//')) return `https:${value}`;
